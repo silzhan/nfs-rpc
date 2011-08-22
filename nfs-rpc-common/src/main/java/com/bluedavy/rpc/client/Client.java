@@ -1,11 +1,21 @@
-package com.bluedavy.rpc;
+package com.bluedavy.rpc.client;
 /**
  * RPC Client Interface
  */
 public interface Client {
 	
 	/**
-	 * invoke sync
+	 * invoke sync via simple call
+	 * 
+	 * @param message
+	 * @param timeout
+	 * @return Object
+	 * @throws Exception
+	 */
+	public Object invokeSync(Object message,int timeout) throws Exception;
+	
+	/**
+	 * invoke sync via rpc
 	 * 
 	 * @param targetInstanceName server instance name
 	 * @param methodName server method name

@@ -17,17 +17,24 @@ public class RequestWrapper {
 	
 	private Object[] requestObjects = null;
 	
+	private Object message = null;
+	
 	private int timeout = 0;
 	
 	private int id = 0;
 	
-	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,Object[] requestObjects,int timeout){
-		this.requestObjects = requestObjects;
-		this.id = incId.incrementAndGet();
+	public RequestWrapper(Object message,int timeout){
+		this(message,timeout,incId.incrementAndGet());
+	}
+	
+	public RequestWrapper(Object message,int timeout,int id){
+		this.message = message;
+		this.id = id;
 		this.timeout = timeout;
-		this.targetInstanceName = targetInstanceName;
-		this.methodName = methodName;
-		this.argTypes = argTypes;
+	}
+
+	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,Object[] requestObjects,int timeout){
+		this(targetInstanceName,methodName,argTypes,requestObjects,timeout,incId.incrementAndGet());
 	}
 	
 	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
@@ -40,6 +47,10 @@ public class RequestWrapper {
 		this.argTypes = argTypes;
 	}
 
+	public Object getMessage() {
+		return message;
+	}
+	
 	public String getTargetInstanceName() {
 		return targetInstanceName;
 	}

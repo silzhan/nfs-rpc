@@ -9,13 +9,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.bluedavy.rpc.NamedThreadFactory;
-import com.bluedavy.rpc.Server;
+import com.bluedavy.rpc.ProtocolFactory;
+import com.bluedavy.rpc.ProtocolFactory.TYPE;
+import com.bluedavy.rpc.server.Server;
+import com.bluedavy.rpc.server.ServerProcessor;
 
 /**
- * 用于RPC Benchmark测试的服务器端 性能数据暂时均在客户端收集，以客户端数据为准 Usage: BenchmarkServer
+ * 用于Simple Processor Pattern Benchmark测试的服务器端 性能数据暂时均在客户端收集，以客户端数据为准 Usage: BenchmarkServer
  * listenPort maxThreads responseSize
  */
-public abstract class AbstractBenchmarkServer {
+public abstract class AbstractSimpleProcessorBenchmarkServer {
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
@@ -39,8 +42,13 @@ public abstract class AbstractBenchmarkServer {
 				+ ",maxThreads is:" + maxThreads + ",responseSize is:"
 				+ responseSize + " bytes");
 
+		ProtocolFactory.setProtocol(TYPE.SIMPLE);
 		Server server = getServer();
-		server.registerProcessor("testservice", new BenchmarkTestServiceImpl(responseSize));
+		server.registerProcessor("testservice", new ServerProcessor() {
+			public Object handle(Object request) throws Exception {
+				return new ResponseObject(responseSize);
+			}
+		});
 		ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
 		ExecutorService threadPool = new ThreadPoolExecutor(20, maxThreads,
 				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);

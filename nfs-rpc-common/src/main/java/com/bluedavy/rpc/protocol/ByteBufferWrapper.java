@@ -1,4 +1,4 @@
-package com.bluedavy.rpc;
+package com.bluedavy.rpc.protocol;
 
 public interface ByteBufferWrapper {
 
