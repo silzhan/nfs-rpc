@@ -22,6 +22,7 @@ import com.bluedavy.rpc.ResponseWrapper;
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
  *  KEEPED(1B):    保留协议头5
+ *  KEEPED(1B):    保留协议头6  // 保证对齐
  *  ID(4B):        请求ID
  *  TIMEOUT(4B):   请求超时时间
  *  TARGETINSTANCELEN(4B):  目标名称的长度
@@ -50,6 +51,7 @@ import com.bluedavy.rpc.ResponseWrapper;
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
  *  KEEPED(1B):    保留协议头5
+ *  KEEPED(1B):    保留协议头6  // 保证对齐
  *  ID(4B):        请求ID
  *  LENGTH(4B):    包长度
  *  BODY
@@ -104,6 +106,7 @@ public class NettyProtocolEncoder extends OneToOneEncoder {
 				ChannelBuffer byteBuffer = ChannelBuffers.dynamicBuffer(capacity);
 				byteBuffer.writeByte(VERSION);
 				byteBuffer.writeByte(type);
+				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
@@ -165,6 +168,7 @@ public class NettyProtocolEncoder extends OneToOneEncoder {
 			ChannelBuffer byteBuffer = ChannelBuffers.dynamicBuffer(capacity);
 			byteBuffer.writeByte(VERSION);
 			byteBuffer.writeByte(type);
+			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);

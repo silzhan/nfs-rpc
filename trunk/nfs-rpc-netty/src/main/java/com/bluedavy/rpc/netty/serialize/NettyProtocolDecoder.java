@@ -16,6 +16,7 @@ import com.bluedavy.rpc.ResponseWrapper;
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
  *  KEEPED(1B):    保留协议头5
+ *  KEEPED(1B):    保留协议头6 // 保证对齐
  *  ID(4B):        请求ID
  *  TIMEOUT(4B):   请求超时时间
  *  TARGETINSTANCELEN(4B):  目标名称的长度
@@ -44,6 +45,7 @@ import com.bluedavy.rpc.ResponseWrapper;
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
  *  KEEPED(1B):    保留协议头5
+ *  KEEPED(1B):    保留协议头6 // 保证对齐
  *  ID(4B):        请求ID
  *  LENGTH(4B):    包长度
  *  BODY
@@ -73,6 +75,7 @@ public class NettyProtocolDecoder extends FrameDecoder {
         			in.setIndex(originPos,in.writerIndex());
         			return null;
         		}
+        		in.readByte();
         		in.readByte();
         		in.readByte();
         		in.readByte();
@@ -131,6 +134,7 @@ public class NettyProtocolDecoder extends FrameDecoder {
         			return null;
         		}
         		in.readByte();
+            	in.readByte();
             	in.readByte();
             	in.readByte();
             	in.readByte();
