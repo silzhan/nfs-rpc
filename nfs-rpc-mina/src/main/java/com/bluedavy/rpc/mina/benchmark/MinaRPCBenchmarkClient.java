@@ -15,22 +15,15 @@ public class MinaRPCBenchmarkClient extends AbstractRPCBenchmarkClient {
 		new MinaRPCBenchmarkClient().run(args);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.bluedavy.rpc.benchmark.AbstractBenchmarkClient#getProxyInstance(java
-	 * .util.List, int, int, java.lang.String, java.util.Map)
-	 */
 	public BenchmarkTestService getProxyInstance(
 			List<InetSocketAddress> servers, int clientNums,
 			int connectTimeout, String targetInstanceName,
-			Map<String, Integer> methodTimeouts) {
+			Map<String, Integer> methodTimeouts, int datatype) {
 		return (BenchmarkTestService) Proxy.newProxyInstance(
 				MinaRPCBenchmarkClient.class.getClassLoader(),
 				new Class<?>[] { BenchmarkTestService.class },
 				new MinaClientInvocationHandler(servers, clientNums,
-						connectTimeout, targetInstanceName, methodTimeouts));
+						connectTimeout, targetInstanceName, methodTimeouts,datatype));
 	}
 
 }
