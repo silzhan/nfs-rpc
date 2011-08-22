@@ -16,6 +16,7 @@ import com.bluedavy.rpc.ResponseWrapper;
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
  *  KEEPED(1B):    保留协议头5
+ *  KEEPED(1B):    保留协议头6 // 保证协议头的对齐
  *  ID(4B):        请求ID
  *  TIMEOUT(4B):   请求超时时间
  *  TARGETINSTANCELEN(4B):  目标名称的长度
@@ -44,15 +45,16 @@ import com.bluedavy.rpc.ResponseWrapper;
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
  *  KEEPED(1B):    保留协议头5
+ *  KEEPED(1B):    保留协议头6
  *  ID(4B):        请求ID
  *  LENGTH(4B):    包长度
  *  BODY
  */
 public class MinaProtocolDecoder extends CumulativeProtocolDecoder {
 
-	private static final int REQUEST_HEADER_LEN = 1 * 7 + 5 * 4;
+	private static final int REQUEST_HEADER_LEN = 1 * 8 + 5 * 4;
 	
-	private static final int RESPONSE_HEADER_LEN = 1 * 7 + 2 * 4;
+	private static final int RESPONSE_HEADER_LEN = 1 * 8 + 2 * 4;
 	
 	private static final byte REQUEST = (byte)0;
 	
@@ -73,6 +75,7 @@ public class MinaProtocolDecoder extends CumulativeProtocolDecoder {
         			in.position(originPos);
         			return false;
         		}
+        		in.get();
         		in.get();
         		in.get();
         		in.get();
@@ -131,6 +134,7 @@ public class MinaProtocolDecoder extends CumulativeProtocolDecoder {
         			return false;
         		}
         		in.get();
+            	in.get();
             	in.get();
             	in.get();
             	in.get();

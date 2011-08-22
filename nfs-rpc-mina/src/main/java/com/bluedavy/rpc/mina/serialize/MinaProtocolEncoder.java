@@ -23,6 +23,7 @@ import com.bluedavy.rpc.ResponseWrapper;
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
  *  KEEPED(1B):    保留协议头5
+ *  KEEPED(1B):    保留协议头6 // 保证协议头的对齐
  *  ID(4B):        请求ID
  *  TIMEOUT(4B):   请求超时时间
  *  TARGETINSTANCELEN(4B):  目标名称的长度
@@ -51,6 +52,7 @@ import com.bluedavy.rpc.ResponseWrapper;
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
  *  KEEPED(1B):    保留协议头5
+ *  KEEPED(1B):    保留协议头6 // 保证协议头的对齐
  *  ID(4B):        请求ID
  *  LENGTH(4B):    包长度
  *  BODY
@@ -112,6 +114,7 @@ public class MinaProtocolEncoder extends ProtocolEncoderAdapter {
 				byteBuffer.put((byte)0);
 				byteBuffer.put((byte)0);
 				byteBuffer.put((byte)0);
+				byteBuffer.put((byte)0);
 				byteBuffer.putInt(id);
 				byteBuffer.putInt(timeout);
 				byteBuffer.putInt(targetInstanceNameByte.length);
@@ -165,6 +168,7 @@ public class MinaProtocolEncoder extends ProtocolEncoderAdapter {
 			ByteBuffer byteBuffer = ByteBuffer.allocate(capacity,false);
 			byteBuffer.put(VERSION);
 			byteBuffer.put(type);
+			byteBuffer.put((byte)0);
 			byteBuffer.put((byte)0);
 			byteBuffer.put((byte)0);
 			byteBuffer.put((byte)0);
