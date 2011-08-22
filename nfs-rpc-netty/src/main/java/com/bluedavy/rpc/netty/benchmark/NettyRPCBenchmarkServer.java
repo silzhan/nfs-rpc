@@ -1,13 +1,13 @@
 package com.bluedavy.rpc.netty.benchmark;
 
-import com.bluedavy.rpc.Server;
-import com.bluedavy.rpc.benchmark.AbstractBenchmarkServer;
+import com.bluedavy.rpc.benchmark.AbstractRPCBenchmarkServer;
 import com.bluedavy.rpc.netty.server.NettyServer;
+import com.bluedavy.rpc.server.Server;
 
-public class NettyBenchmarkServer extends AbstractBenchmarkServer {
+public class NettyRPCBenchmarkServer extends AbstractRPCBenchmarkServer {
 
 	public static void main(String[] args) throws Exception{
-		new NettyBenchmarkServer().run(args);
+		new NettyRPCBenchmarkServer().run(args);
 	}
 	
 	public Server getServer() {

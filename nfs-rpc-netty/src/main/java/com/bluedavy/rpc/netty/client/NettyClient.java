@@ -4,8 +4,8 @@ import java.net.InetSocketAddress;
 
 import org.jboss.netty.channel.ChannelFuture;
 
-import com.bluedavy.rpc.AbstractClient;
 import com.bluedavy.rpc.RequestWrapper;
+import com.bluedavy.rpc.client.AbstractClient;
 
 public class NettyClient extends AbstractClient {
 

@@ -10,9 +10,9 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
+import com.bluedavy.rpc.ProtocolFactory;
 import com.bluedavy.rpc.RequestWrapper;
 import com.bluedavy.rpc.ResponseWrapper;
-import com.bluedavy.rpc.ServerHandlerUtil;
 
 public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 
@@ -39,7 +39,7 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 			threadpool.execute(new Runnable() {
 				public void run() {
 					long beginTime = System.currentTimeMillis();
-					ResponseWrapper responseWrapper = ServerHandlerUtil.handleRequest(request);
+					ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler().handleRequest(request);
 					int consumeTime = Integer.parseInt(""+(System.currentTimeMillis() - beginTime));
 					// 说明客户端已超时，没必要返回
 					if(consumeTime >= request.getTimeout()){

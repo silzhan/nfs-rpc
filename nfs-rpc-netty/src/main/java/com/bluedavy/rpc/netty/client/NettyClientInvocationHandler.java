@@ -4,8 +4,8 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 
-import com.bluedavy.rpc.AbstractClientInvocationHandler;
-import com.bluedavy.rpc.ClientFactory;
+import com.bluedavy.rpc.client.AbstractClientInvocationHandler;
+import com.bluedavy.rpc.client.ClientFactory;
 
 public class NettyClientInvocationHandler extends
 		AbstractClientInvocationHandler {

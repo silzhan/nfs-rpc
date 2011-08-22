@@ -8,9 +8,9 @@ import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
 
-import com.bluedavy.rpc.AbstractClientFactory;
-import com.bluedavy.rpc.Client;
 import com.bluedavy.rpc.NamedThreadFactory;
+import com.bluedavy.rpc.client.AbstractClientFactory;
+import com.bluedavy.rpc.client.Client;
 
 public class NettyClientFactory extends AbstractClientFactory {
 
