@@ -1,10 +1,9 @@
 package com.bluedavy.rpc.protocol;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bluedavy.rpc.Coders;
 import com.bluedavy.rpc.RequestWrapper;
 import com.bluedavy.rpc.ResponseWrapper;
 
@@ -12,12 +11,12 @@ import com.bluedavy.rpc.ResponseWrapper;
  * 请求协议格式包：
  * 	VERSION(1B):   协议版本号
  *  TYPE(1B):      请求/响应 
+ *  DATATYPE(1B):  序列化协议类型
  *  KEEPED(1B):    保留协议头1
  *  KEEPED(1B):    保留协议头2
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
- *  KEEPED(1B):    保留协议头5
- *  KEEPED(1B):    保留协议头6  // 保证对齐
+ *  KEEPED(1B):    保留协议头5  // 保证对齐
  *  ID(4B):        请求ID
  *  TIMEOUT(4B):   请求超时时间
  *  TARGETINSTANCELEN(4B):  目标名称的长度
@@ -41,12 +40,12 @@ import com.bluedavy.rpc.ResponseWrapper;
  * 响应协议格式包：
  *  VERSION(1B):   协议版本号
  *  TYPE(1B):      请求/响应 
+ *  DATATYPE(1B):  序列化协议类型
  *  KEEPED(1B):    保留协议头1
  *  KEEPED(1B):    保留协议头2
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
- *  KEEPED(1B):    保留协议头5
- *  KEEPED(1B):    保留协议头6  // 保证对齐
+ *  KEEPED(1B):    保留协议头5  // 保证对齐
  *  ID(4B):        请求ID
  *  LENGTH(4B):    包长度
  *  BODY
@@ -88,12 +87,7 @@ public class RPCProtocol implements Protocol {
 				}
 				Object[] requestObjects = wrapper.getRequestObjects();
 				for (Object requestArg : requestObjects) {
-					ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-					ObjectOutputStream output = new ObjectOutputStream(byteArray);
-					output.writeObject(requestArg);
-					output.flush();
-					output.close();
-					byte[] requestArgByte = byteArray.toByteArray(); 
+					byte[] requestArgByte = Coders.getEncoder(String.valueOf(wrapper.getDataType())).encode(requestArg);
 					requestArgs.add(requestArgByte);
 					requestArgsLen += requestArgByte.length;
 				}
@@ -105,7 +99,7 @@ public class RPCProtocol implements Protocol {
 				ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 				byteBuffer.writeByte(VERSION);
 				byteBuffer.writeByte(type);
-				byteBuffer.writeByte((byte)0);
+				byteBuffer.writeByte((byte)wrapper.getDataType());
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
@@ -142,12 +136,9 @@ public class RPCProtocol implements Protocol {
 		}
 		else{
 			ResponseWrapper wrapper = (ResponseWrapper) message;
-			ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+			byte[] body = null;
 			try{
-				ObjectOutputStream output = new ObjectOutputStream(byteArray);
-				output.writeObject(wrapper.getResponse());
-				output.flush();
-				output.close();
+				body = Coders.getEncoder(String.valueOf(wrapper.getDataType())).encode(wrapper.getResponse());
 				id = wrapper.getRequestId();
 			}
 			catch(Exception e){
@@ -156,18 +147,14 @@ public class RPCProtocol implements Protocol {
 				// LOGGER.error("serialize response object error",e);
 				// 仍然创建响应客户端，以便客户端快速接到响应做相应的处理
 				wrapper.setResponse(new Exception("serialize response object error",e));
-				ObjectOutputStream output = new ObjectOutputStream(byteArray);
-				output.writeObject(wrapper.getResponse());
-				output.flush();
-				output.close();
+				body = Coders.getEncoder(String.valueOf(wrapper.getDataType())).encode(wrapper.getResponse());
 			}
 			type = RESPONSE;
-			byte[] body = byteArray.toByteArray();
 			int capacity = RESPONSE_HEADER_LEN + body.length;
 			ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 			byteBuffer.writeByte(VERSION);
 			byteBuffer.writeByte(type);
-			byteBuffer.writeByte((byte)0);
+			byteBuffer.writeByte((byte)wrapper.getDataType());
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
@@ -199,7 +186,7 @@ public class RPCProtocol implements Protocol {
         			wrapper.setReaderIndex(originPos);
         			return errorObject;
         		}
-        		wrapper.readByte();
+        		int dataType = wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
@@ -249,7 +236,8 @@ public class RPCProtocol implements Protocol {
 					wrapper.readBytes(argByte);
 					args[i] = argByte;
 				}
-        		RequestWrapper requestWrapper = new RequestWrapper(targetInstanceName, methodName, argTypes, args, timeout, requestId);
+        		RequestWrapper requestWrapper = new RequestWrapper(targetInstanceName, methodName, 
+        														   argTypes, args, timeout, requestId, dataType);
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
@@ -257,7 +245,7 @@ public class RPCProtocol implements Protocol {
         			wrapper.setReaderIndex(originPos);
         			return errorObject;
         		}
-        		wrapper.readByte();
+        		int dataType = wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
@@ -274,6 +262,7 @@ public class RPCProtocol implements Protocol {
             	ResponseWrapper responseWrapper = new ResponseWrapper();
             	responseWrapper.setRequestId(requestId);
             	responseWrapper.setResponse(bodyBytes);
+            	responseWrapper.setDataType(dataType);
 	        	return responseWrapper;
         	}
         	else{

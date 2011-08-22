@@ -1,11 +1,10 @@
 package com.bluedavy.rpc.server;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.bluedavy.rpc.Coders;
 import com.bluedavy.rpc.RequestWrapper;
 import com.bluedavy.rpc.ResponseWrapper;
 
@@ -44,6 +43,7 @@ public class RPCServerHandler implements ServerHandler {
 	public ResponseWrapper handleRequest(final RequestWrapper request){
 		ResponseWrapper responseWrapper = new ResponseWrapper();
 		responseWrapper.setRequestId(request.getId());
+		responseWrapper.setDataType(request.getDataType());
 		String targetInstanceName = request.getTargetInstanceName();
 		String methodName = request.getMethodName();
 		String[] argTypes = request.getArgTypes();
@@ -68,11 +68,7 @@ public class RPCServerHandler implements ServerHandler {
 				Object[] tmprequestObjects = request
 						.getRequestObjects();
 				for (int i = 0; i < tmprequestObjects.length; i++) {
-					ObjectInputStream objectIn = new ObjectInputStream(
-							new ByteArrayInputStream(
-									(byte[]) tmprequestObjects[i]));
-					requestObjects[i] = objectIn.readObject();
-					objectIn.close();
+					requestObjects[i] = Coders.getDecoder(String.valueOf(request.getDataType())).decode((byte[])tmprequestObjects[i]);
 				}
 			} 
 			else {

@@ -3,6 +3,10 @@ package com.bluedavy.rpc.protocol;
 
 public interface Protocol {
 
+	public static final int JAVA_DATA = 1;
+	
+	public static final int HESSIAN_DATA = 2;
+	
 	/**
 	 * encode Message to byte & write to io framework
 	 * 

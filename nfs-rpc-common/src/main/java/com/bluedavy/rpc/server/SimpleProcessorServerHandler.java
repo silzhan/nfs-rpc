@@ -1,8 +1,6 @@
 package com.bluedavy.rpc.server;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
-
+import com.bluedavy.rpc.Coders;
 import com.bluedavy.rpc.RequestWrapper;
 import com.bluedavy.rpc.ResponseWrapper;
 
@@ -17,11 +15,9 @@ public class SimpleProcessorServerHandler implements ServerHandler{
 	public ResponseWrapper handleRequest(final RequestWrapper request){
 		ResponseWrapper responseWrapper = new ResponseWrapper();
 		responseWrapper.setRequestId(request.getId());
+		responseWrapper.setDataType(request.getDataType());
 		try{
-			ObjectInputStream objectIn = new ObjectInputStream(
-							new ByteArrayInputStream((byte[]) request.getMessage()));
-			Object requestObject = objectIn.readObject();
-			objectIn.close();
+			Object requestObject = Coders.getDecoder(String.valueOf(request.getDataType())).decode((byte[])request.getMessage());
 			responseWrapper.setResponse(processor.handle(requestObject));
 		}
 		catch(Exception e){
