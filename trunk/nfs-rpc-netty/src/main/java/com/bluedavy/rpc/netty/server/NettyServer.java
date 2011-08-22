@@ -13,10 +13,10 @@ import org.jboss.netty.channel.DefaultChannelPipeline;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import com.bluedavy.rpc.NamedThreadFactory;
-import com.bluedavy.rpc.Server;
-import com.bluedavy.rpc.ServerHandlerUtil;
+import com.bluedavy.rpc.ProtocolFactory;
 import com.bluedavy.rpc.netty.serialize.NettyProtocolDecoder;
 import com.bluedavy.rpc.netty.serialize.NettyProtocolEncoder;
+import com.bluedavy.rpc.server.Server;
 
 public class NettyServer implements Server {
 
@@ -50,7 +50,7 @@ public class NettyServer implements Server {
 	}
 
 	public void registerProcessor(String serviceName, Object serviceInstance) {
-		ServerHandlerUtil.registerProcessor(serviceName, serviceInstance);
+		ProtocolFactory.getServerHandler().registerProcessor(serviceName, serviceInstance);
 	}
 	
 	public void stop() throws Exception {

@@ -3,7 +3,7 @@ package com.bluedavy.rpc.netty.serialize;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
-import com.bluedavy.rpc.ByteBufferWrapper;
+import com.bluedavy.rpc.protocol.ByteBufferWrapper;
 
 public class NettyByteBufferWrapper implements ByteBufferWrapper {
 

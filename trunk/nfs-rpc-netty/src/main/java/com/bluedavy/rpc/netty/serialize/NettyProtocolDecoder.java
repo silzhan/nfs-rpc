@@ -5,7 +5,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
-import com.bluedavy.rpc.RPCProtocolUtil;
+import com.bluedavy.rpc.ProtocolFactory;
 /**
  * encode message
  */
@@ -13,7 +13,7 @@ public class NettyProtocolDecoder extends FrameDecoder {
 	
 	protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer in) throws Exception {
 		NettyByteBufferWrapper wrapper = new NettyByteBufferWrapper(in);
-		return RPCProtocolUtil.decode(wrapper, null);
+		return ProtocolFactory.getProtocol().decode(wrapper, null);
 	}
 
 }
