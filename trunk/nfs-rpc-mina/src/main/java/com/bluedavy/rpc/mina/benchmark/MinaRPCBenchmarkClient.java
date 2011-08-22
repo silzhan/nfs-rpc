@@ -5,14 +5,14 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 
-import com.bluedavy.rpc.benchmark.AbstractBenchmarkClient;
+import com.bluedavy.rpc.benchmark.AbstractRPCBenchmarkClient;
 import com.bluedavy.rpc.benchmark.BenchmarkTestService;
 import com.bluedavy.rpc.mina.client.MinaClientInvocationHandler;
 
-public class MinaBenchmarkClient extends AbstractBenchmarkClient {
+public class MinaRPCBenchmarkClient extends AbstractRPCBenchmarkClient {
 
 	public static void main(String[] args) throws Exception {
-		new MinaBenchmarkClient().run(args);
+		new MinaRPCBenchmarkClient().run(args);
 	}
 
 	/*
@@ -27,7 +27,7 @@ public class MinaBenchmarkClient extends AbstractBenchmarkClient {
 			int connectTimeout, String targetInstanceName,
 			Map<String, Integer> methodTimeouts) {
 		return (BenchmarkTestService) Proxy.newProxyInstance(
-				MinaBenchmarkClient.class.getClassLoader(),
+				MinaRPCBenchmarkClient.class.getClassLoader(),
 				new Class<?>[] { BenchmarkTestService.class },
 				new MinaClientInvocationHandler(servers, clientNums,
 						connectTimeout, targetInstanceName, methodTimeouts));

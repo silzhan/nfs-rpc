@@ -1,13 +1,13 @@
 package com.bluedavy.rpc.mina.benchmark;
 
-import com.bluedavy.rpc.Server;
-import com.bluedavy.rpc.benchmark.AbstractBenchmarkServer;
+import com.bluedavy.rpc.benchmark.AbstractRPCBenchmarkServer;
 import com.bluedavy.rpc.mina.server.MinaServer;
+import com.bluedavy.rpc.server.Server;
 
-public class MinaBenchmarkServer extends AbstractBenchmarkServer {
+public class MinaRPCBenchmarkServer extends AbstractRPCBenchmarkServer {
 
 	public static void main(String[] args) throws Exception{
-		new MinaBenchmarkServer().run(args);
+		new MinaRPCBenchmarkServer().run(args);
 	}
 	
 	public Server getServer() {

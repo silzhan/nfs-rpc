@@ -13,9 +13,9 @@ import org.apache.mina.common.ThreadModel;
 import org.apache.mina.transport.socket.nio.SocketConnector;
 import org.apache.mina.transport.socket.nio.SocketConnectorConfig;
 
-import com.bluedavy.rpc.AbstractClientFactory;
-import com.bluedavy.rpc.Client;
 import com.bluedavy.rpc.NamedThreadFactory;
+import com.bluedavy.rpc.client.AbstractClientFactory;
+import com.bluedavy.rpc.client.Client;
 import com.bluedavy.rpc.mina.serialize.MinaProtocolCodecFilter;
 
 public class MinaClientFactory extends AbstractClientFactory {

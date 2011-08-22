@@ -12,9 +12,9 @@ import org.apache.mina.common.ThreadModel;
 import org.apache.mina.transport.socket.nio.SocketAcceptor;
 
 import com.bluedavy.rpc.NamedThreadFactory;
-import com.bluedavy.rpc.Server;
-import com.bluedavy.rpc.ServerHandlerUtil;
+import com.bluedavy.rpc.ProtocolFactory;
 import com.bluedavy.rpc.mina.serialize.MinaProtocolCodecFilter;
+import com.bluedavy.rpc.server.Server;
 
 public class MinaServer implements Server {
 
@@ -53,7 +53,7 @@ public class MinaServer implements Server {
 	}
 	
 	public void registerProcessor(String serviceName,Object serviceInstance){
-		ServerHandlerUtil.registerProcessor(serviceName, serviceInstance);
+		ProtocolFactory.getServerHandler().registerProcessor(serviceName, serviceInstance);
 	}
 
 	public void stop() throws Exception {

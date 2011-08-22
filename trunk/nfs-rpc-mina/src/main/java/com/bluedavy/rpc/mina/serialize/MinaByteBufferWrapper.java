@@ -2,7 +2,7 @@ package com.bluedavy.rpc.mina.serialize;
 
 import org.apache.mina.common.ByteBuffer;
 
-import com.bluedavy.rpc.ByteBufferWrapper;
+import com.bluedavy.rpc.protocol.ByteBufferWrapper;
 
 public class MinaByteBufferWrapper implements ByteBufferWrapper {
 
