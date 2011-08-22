@@ -2,14 +2,14 @@ package com.bluedavy.rpc.protocol;
 
 import java.io.ByteArrayInputStream;
 
-import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.HessianInput;
 
 public class HessianDecoder implements Decoder {
 
 	public Object decode(byte[] bytes) throws Exception {
-		Hessian2Input input = new Hessian2Input(new ByteArrayInputStream(bytes));
+		HessianInput input = new HessianInput(new ByteArrayInputStream(bytes));
 		Object resultObject = input.readObject();
-		input.close();
+//		input.close();
 		return resultObject;
 	}
 
