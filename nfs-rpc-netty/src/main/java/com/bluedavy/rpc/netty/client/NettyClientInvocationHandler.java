@@ -12,8 +12,8 @@ public class NettyClientInvocationHandler extends
 
 	public NettyClientInvocationHandler(List<InetSocketAddress> servers,
 			int clientNums, int connectTimeout, String targetInstanceName,
-			Map<String, Integer> methodTimeouts) {
-		super(servers, clientNums, connectTimeout, targetInstanceName, methodTimeouts);
+			Map<String, Integer> methodTimeouts,int datatype) {
+		super(servers, clientNums, connectTimeout, targetInstanceName, methodTimeouts,datatype);
 	}
 
 	public ClientFactory getClientFactory() {
