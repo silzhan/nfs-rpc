@@ -23,7 +23,7 @@ import java.util.concurrent.CyclicBarrier;
  * 测试需产生的报告为： 1、执行请求总数、成功率以及失败率 2、tps以及其分布状况 3、平均响应时间以及其分布状况
  * 
  * Usage: -Dwrite.statistics=false BenchmarkClient serverIP serverPort
- * concurrents timeout requestSize runtime(seconds) clientNums
+ * concurrents timeout datatype requestSize runtime(seconds) clientNums
  */
 public abstract class AbstractRPCBenchmarkClient {
 
@@ -72,21 +72,22 @@ public abstract class AbstractRPCBenchmarkClient {
 	private static long above1000sum;
 
 	public void run(String[] args) throws Exception {
-		if (args == null || (args.length != 6 && args.length != 7)) {
+		if (args == null || (args.length != 7 && args.length != 8)) {
 			throw new IllegalArgumentException(
-					"must give six or seven args, serverIP serverPort concurrents timeout requestSize runtime(seconds) clientNums");
+					"must give seven or eight args, serverIP serverPort concurrents timeout datatype requestSize runtime(seconds) clientNums");
 		}
 
 		final String serverIP = args[0];
 		final int serverPort = Integer.parseInt(args[1]);
 		final int concurrents = Integer.parseInt(args[2]);
 		final int timeout = Integer.parseInt(args[3]);
-		final int requestSize = Integer.parseInt(args[4]);
-		runtime = Integer.parseInt(args[5]);
+		final int datatype = Integer.parseInt(args[4]);
+		final int requestSize = Integer.parseInt(args[5]);
+		runtime = Integer.parseInt(args[6]);
 		final long endtime = System.currentTimeMillis() + runtime * 1000;
 		int tmpClientNums = 1;
-		if (args.length == 7) {
-			tmpClientNums = Integer.parseInt(args[6]);
+		if (args.length == 8) {
+			tmpClientNums = Integer.parseInt(args[7]);
 		}
 		final int clientNums = tmpClientNums;
 
@@ -115,7 +116,7 @@ public abstract class AbstractRPCBenchmarkClient {
 		servers.add(new InetSocketAddress(serverIP, serverPort));
 		for (int i = 0; i < concurrents; i++) {
 			Thread thread = new Thread(new RPCBenchmarkClientRunnable(
-					getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts), 
+					getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts, datatype), 
 					requestSize, barrier, latch,endtime), "benchmarkclient-" + i);
 			thread.start();
 		}
@@ -261,6 +262,6 @@ public abstract class AbstractRPCBenchmarkClient {
 	public abstract BenchmarkTestService getProxyInstance(
 			List<InetSocketAddress> servers, int clientNums,
 			int connectTimeout, String targetInstanceName,
-			Map<String, Integer> methodTimeouts);
+			Map<String, Integer> methodTimeouts, int datatype);
 
 }

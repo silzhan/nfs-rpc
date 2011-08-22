@@ -40,8 +40,10 @@ public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 
 	private int rpcTimeout;
 
+	private int dataType;
+	
 	public SimpleProcessorBenchmarkClientRunnable(ClientFactory factory,
-			String targetIP, int targetPort, int clientNums, int rpcTimeout,
+			String targetIP, int targetPort, int clientNums, int rpcTimeout, int dataType,
 			int requestSize, CyclicBarrier barrier, CountDownLatch latch,
 			long endTime) {
 		this.factory = factory;
@@ -49,6 +51,7 @@ public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 		this.targetPort = targetPort;
 		this.clientNums = clientNums;
 		this.rpcTimeout = rpcTimeout;
+		this.dataType = dataType;
 		this.requestSize = requestSize;
 		this.barrier = barrier;
 		this.latch = latch;
@@ -73,7 +76,7 @@ public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 			try {
 				ResponseObject response = (ResponseObject) factory.get(
 						targetIP, targetPort, 1000, clientNums).invokeSync(
-						new RequestObject(requestSize), rpcTimeout);
+						new RequestObject(requestSize), rpcTimeout, dataType);
 				if (response.getBytes() != null) {
 					writer.write(System.currentTimeMillis() + ","
 							+ (System.currentTimeMillis() - beginTime) + "\r\n");

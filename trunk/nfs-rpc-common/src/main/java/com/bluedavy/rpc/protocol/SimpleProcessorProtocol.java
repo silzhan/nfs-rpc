@@ -1,8 +1,6 @@
 package com.bluedavy.rpc.protocol;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-
+import com.bluedavy.rpc.Coders;
 import com.bluedavy.rpc.RequestWrapper;
 import com.bluedavy.rpc.ResponseWrapper;
 
@@ -10,12 +8,12 @@ import com.bluedavy.rpc.ResponseWrapper;
  * 协议格式包：
  * 	VERSION(1B):   协议版本号
  *  TYPE(1B):      请求/响应 
+ *  DATATYPE(1B):  序列化类型
  *  KEEPED(1B):    保留协议头1
  *  KEEPED(1B):    保留协议头2
  *  KEEPED(1B):    保留协议头3
  *  KEEPED(1B):    保留协议头4
- *  KEEPED(1B):    保留协议头5
- *  KEEPED(1B):    保留协议头6  // 保证对齐
+ *  KEEPED(1B):    保留协议头5  // 保证对齐
  *  ID(4B):        请求ID
  *  TIMEOUT(4B):   请求超时时间
  *  LENGTH(4B):    包长度
@@ -46,15 +44,12 @@ public class SimpleProcessorProtocol implements Protocol{
 		byte type = REQUEST;
 		byte[] body = null;
 		int timeout = 0;
+		int dataType = 0;
 		if(message instanceof RequestWrapper){
 			try{
 				RequestWrapper wrapper = (RequestWrapper) message;
-				ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-				ObjectOutputStream output = new ObjectOutputStream(byteArray);
-				output.writeObject(wrapper.getMessage());
-				output.flush();
-				output.close();
-				body = byteArray.toByteArray(); 
+				dataType = wrapper.getDataType();
+				body = Coders.getEncoder(String.valueOf(dataType)).encode(wrapper.getMessage()); 
 				id = wrapper.getId();
 				timeout = wrapper.getTimeout();
 			}
@@ -68,12 +63,9 @@ public class SimpleProcessorProtocol implements Protocol{
 		}
 		else{
 			ResponseWrapper wrapper = (ResponseWrapper) message;
-			ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
 			try{
-				ObjectOutputStream output = new ObjectOutputStream(byteArray);
-				output.writeObject(wrapper.getResponse());
-				output.flush();
-				output.close();
+				dataType = wrapper.getDataType();
+				body = Coders.getEncoder(String.valueOf(dataType)).encode(wrapper.getResponse()); 
 				id = wrapper.getRequestId();
 			}
 			catch(Exception e){
@@ -82,19 +74,15 @@ public class SimpleProcessorProtocol implements Protocol{
 				// LOGGER.error("serialize response object error",e);
 				// 仍然创建响应客户端，以便客户端快速接到响应做相应的处理
 				wrapper.setResponse(new Exception("serialize response object error",e));
-				ObjectOutputStream output = new ObjectOutputStream(byteArray);
-				output.writeObject(wrapper.getResponse());
-				output.flush();
-				output.close();
+				body = Coders.getEncoder(String.valueOf(wrapper.getDataType())).encode(wrapper.getResponse()); 
 			}
 			type = RESPONSE;
-			body = byteArray.toByteArray();
 		}
 		int capacity = HEADER_LEN + body.length;
 		ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 		byteBuffer.writeByte(VERSION);
 		byteBuffer.writeByte(type);
-		byteBuffer.writeByte((byte)0);
+		byteBuffer.writeByte((byte)dataType);
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);
@@ -125,7 +113,7 @@ public class SimpleProcessorProtocol implements Protocol{
         // 版本1协议的解析方式
         if(version == (byte)1){
         	byte type = wrapper.readByte();
-        	wrapper.readByte();
+        	int dataType = wrapper.readByte();
     		wrapper.readByte();
     		wrapper.readByte();
     		wrapper.readByte();
@@ -141,13 +129,14 @@ public class SimpleProcessorProtocol implements Protocol{
     		byte[] body = new byte[expectedLen];
     		wrapper.readBytes(body);
         	if(type == REQUEST){
-        		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId);
+        		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId,dataType);
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
         		ResponseWrapper responseWrapper = new ResponseWrapper();
             	responseWrapper.setRequestId(requestId);
             	responseWrapper.setResponse(body);
+            	responseWrapper.setDataType(dataType);
 	        	return responseWrapper;
         	}
         	else{

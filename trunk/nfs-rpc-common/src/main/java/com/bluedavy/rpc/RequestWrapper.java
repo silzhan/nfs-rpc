@@ -2,6 +2,8 @@ package com.bluedavy.rpc;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.bluedavy.rpc.protocol.Protocol;
+
 /**
  * 发送的请求包，但写入输出流时不是直接把这个对象写入，因此此对象不用支持序列化
  */
@@ -23,22 +25,26 @@ public class RequestWrapper {
 	
 	private int id = 0;
 	
-	public RequestWrapper(Object message,int timeout){
-		this(message,timeout,incId.incrementAndGet());
+	private int dataType = Protocol.HESSIAN_DATA;
+	
+	public RequestWrapper(Object message,int timeout,int dataType){
+		this(message,timeout,incId.incrementAndGet(),dataType);
 	}
 	
-	public RequestWrapper(Object message,int timeout,int id){
+	public RequestWrapper(Object message,int timeout,int id,int dataType){
 		this.message = message;
 		this.id = id;
 		this.timeout = timeout;
+		this.dataType = dataType;
 	}
 
-	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,Object[] requestObjects,int timeout){
-		this(targetInstanceName,methodName,argTypes,requestObjects,timeout,incId.incrementAndGet());
-	}
-	
 	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
-						  Object[] requestObjects,int timeout,int id){
+						  Object[] requestObjects,int timeout,int dataType){
+		this(targetInstanceName,methodName,argTypes,requestObjects,timeout,incId.incrementAndGet(),dataType);
+	}
+
+	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
+						  Object[] requestObjects,int timeout,int id,int dataType){
 		this.requestObjects = requestObjects;
 		this.id = id;
 		this.timeout = timeout;
@@ -47,6 +53,10 @@ public class RequestWrapper {
 		this.argTypes = argTypes;
 	}
 
+	public int getDataType() {
+		return dataType;
+	}
+	
 	public Object getMessage() {
 		return message;
 	}
