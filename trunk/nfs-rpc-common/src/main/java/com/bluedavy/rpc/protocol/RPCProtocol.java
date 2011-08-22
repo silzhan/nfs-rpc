@@ -1,9 +1,12 @@
-package com.bluedavy.rpc;
+package com.bluedavy.rpc.protocol;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.bluedavy.rpc.RequestWrapper;
+import com.bluedavy.rpc.ResponseWrapper;
 
 /**
  * 请求协议格式包：
@@ -48,7 +51,7 @@ import java.util.List;
  *  LENGTH(4B):    包长度
  *  BODY
  */
-public class RPCProtocolUtil {
+public class RPCProtocol implements Protocol {
 	
 	private static final int REQUEST_HEADER_LEN = 1 * 8 + 5 * 4;
 	
@@ -60,14 +63,11 @@ public class RPCProtocolUtil {
 	
 	private static final byte RESPONSE = (byte)1;
 	
-	/**
-	 * encode Message to byte & write to io framework
-	 * 
-	 * @param message
-	 * @param byteBuffer
-	 * @throws Exception
+	/* (non-Javadoc)
+	 * @see com.bluedavy.rpc.Protocol#encode(java.lang.Object, com.bluedavy.rpc.ByteBufferWrapper)
 	 */
-	public static ByteBufferWrapper encode(Object message,ByteBufferWrapper bytebufferWrapper) throws Exception{
+	@Override
+	public ByteBufferWrapper encode(Object message,ByteBufferWrapper bytebufferWrapper) throws Exception{
 		if(!(message instanceof RequestWrapper) && !(message instanceof ResponseWrapper)){
 			throw new Exception("only support send RequestWrapper && ResponseWrapper");
 		}
@@ -180,15 +180,11 @@ public class RPCProtocolUtil {
 		}
 	}
 	
-	/**
-	 * decode stream to object
-	 * 
-	 * @param wrapper
-	 * @param errorObject stream not enough,then return this object
-	 * @return Object 
-	 * @throws Exception
+	/* (non-Javadoc)
+	 * @see com.bluedavy.rpc.Protocol#decode(com.bluedavy.rpc.ByteBufferWrapper, java.lang.Object)
 	 */
-	public static Object decode(ByteBufferWrapper wrapper,Object errorObject) throws Exception{
+	@Override
+	public Object decode(ByteBufferWrapper wrapper,Object errorObject) throws Exception{
 		final int originPos = wrapper.readerIndex();
 		if(wrapper.readableBytes() < 2){
 			wrapper.setReaderIndex(originPos);

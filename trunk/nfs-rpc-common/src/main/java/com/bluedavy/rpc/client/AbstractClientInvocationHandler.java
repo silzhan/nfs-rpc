@@ -1,4 +1,4 @@
-package com.bluedavy.rpc;
+package com.bluedavy.rpc.client;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

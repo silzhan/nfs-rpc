@@ -9,7 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BenchmarkClientRunnable implements Runnable {
+public class RPCBenchmarkClientRunnable implements Runnable {
 
 	private static final AtomicInteger fileNameIndex = new AtomicInteger();
 	
@@ -29,7 +29,7 @@ public class BenchmarkClientRunnable implements Runnable {
 	
 	private BenchmarkTestService testService;
 	
-	public BenchmarkClientRunnable(BenchmarkTestService testService, int requestSize, CyclicBarrier barrier,
+	public RPCBenchmarkClientRunnable(BenchmarkTestService testService, int requestSize, CyclicBarrier barrier,
 			CountDownLatch latch, long endTime) {
 		this.testService = testService;
 		this.requestSize = requestSize;

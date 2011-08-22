@@ -1,4 +1,4 @@
-package com.bluedavy.rpc;
+package com.bluedavy.rpc.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
@@ -6,7 +6,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ServerHandlerUtil {
+import com.bluedavy.rpc.RequestWrapper;
+import com.bluedavy.rpc.ResponseWrapper;
+
+public class RPCServerHandler implements ServerHandler {
 
 	// Server Processors     key: servicename    value: service instance
 	private static Map<String, Object> processors = new HashMap<String, Object>();
@@ -14,7 +17,11 @@ public class ServerHandlerUtil {
 	// Cached Server Methods  key: instanceName#methodname$argtype_argtype
 	private static Map<String, Method> cacheMethods = new HashMap<String, Method>();
 	
-	public static void registerProcessor(String instanceName,Object instance){
+	/* (non-Javadoc)
+	 * @see com.bluedavy.rpc.ServerHandler#registerProcessor(java.lang.String, java.lang.Object)
+	 */
+	@Override
+	public void registerProcessor(String instanceName,Object instance){
 		processors.put(instanceName, instance);
 		Class<?> instanceClass = instance.getClass();
 		Method[] methods = instanceClass.getMethods();
@@ -30,7 +37,11 @@ public class ServerHandlerUtil {
 		}
 	}
 	
-	public static ResponseWrapper handleRequest(final RequestWrapper request){
+	/* (non-Javadoc)
+	 * @see com.bluedavy.rpc.ServerHandler#handleRequest(com.bluedavy.rpc.RequestWrapper)
+	 */
+	@Override
+	public ResponseWrapper handleRequest(final RequestWrapper request){
 		ResponseWrapper responseWrapper = new ResponseWrapper();
 		responseWrapper.setRequestId(request.getId());
 		String targetInstanceName = request.getTargetInstanceName();

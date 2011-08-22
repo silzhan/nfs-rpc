@@ -1,4 +1,4 @@
-package com.bluedavy.rpc;
+package com.bluedavy.rpc.server;
 
 import java.util.concurrent.ExecutorService;
 

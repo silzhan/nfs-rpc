@@ -6,26 +6,27 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
-import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
+import com.bluedavy.rpc.ProtocolFactory;
+import com.bluedavy.rpc.ProtocolFactory.TYPE;
+import com.bluedavy.rpc.client.ClientFactory;
+
 /**
- * 用于RPC Benchmark测试的客户端，主要支持如下测试场景： 1、不同的并发数 2、不同的请求包的大小
+ * 用于Simple Processor Pattern Benchmark测试的客户端，主要支持如下测试场景： 1、不同的并发数 2、不同的请求包的大小
  * 
  * 测试需产生的报告为： 1、执行请求总数、成功率以及失败率 2、tps以及其分布状况 3、平均响应时间以及其分布状况
  * 
  * Usage: -Dwrite.statistics=false BenchmarkClient serverIP serverPort
  * concurrents timeout requestSize runtime(seconds) clientNums
  */
-public abstract class AbstractBenchmarkClient {
+public abstract class AbstractSimpleProcessorBenchmarkClient {
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
@@ -107,16 +108,15 @@ public abstract class AbstractBenchmarkClient {
 				dateFormat.format(calendar.getTime()));
 		System.out.println(startInfo.toString());
 
+		ProtocolFactory.setProtocol(TYPE.SIMPLE);
 		CyclicBarrier barrier = new CyclicBarrier(concurrents);
 		CountDownLatch latch = new CountDownLatch(concurrents);
-		Map<String, Integer> methodTimeouts = new HashMap<String, Integer>();
-		methodTimeouts.put("*", timeout);
-		List<InetSocketAddress> servers = new ArrayList<InetSocketAddress>();
-		servers.add(new InetSocketAddress(serverIP, serverPort));
 		for (int i = 0; i < concurrents; i++) {
-			Thread thread = new Thread(new BenchmarkClientRunnable(
-					getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts), 
-					requestSize, barrier, latch,endtime), "benchmarkclient-" + i);
+			Thread thread = new Thread(
+					new SimpleProcessorBenchmarkClientRunnable(
+							getClientFactory(), serverIP, serverPort,
+							clientNums, timeout, requestSize, barrier, latch,
+							endtime), "benchmarkclient-" + i);
 			thread.start();
 		}
 
@@ -255,12 +255,6 @@ public abstract class AbstractBenchmarkClient {
 		}
 	}
 
-	/*
-	 * return ProxyObject
-	 */
-	public abstract BenchmarkTestService getProxyInstance(
-			List<InetSocketAddress> servers, int clientNums,
-			int connectTimeout, String targetInstanceName,
-			Map<String, Integer> methodTimeouts);
+	public abstract ClientFactory getClientFactory();
 
 }
