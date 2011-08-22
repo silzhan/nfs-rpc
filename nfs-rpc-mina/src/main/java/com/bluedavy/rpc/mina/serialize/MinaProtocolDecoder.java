@@ -5,7 +5,7 @@ import org.apache.mina.common.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
-import com.bluedavy.rpc.RPCProtocolUtil;
+import com.bluedavy.rpc.ProtocolFactory;
 /**
  * decode byte[]
  */
@@ -13,7 +13,7 @@ public class MinaProtocolDecoder extends CumulativeProtocolDecoder {
 	
 	protected boolean doDecode(IoSession session, ByteBuffer in, ProtocolDecoderOutput out) throws Exception {
 		MinaByteBufferWrapper wrapper = new MinaByteBufferWrapper(in);
-		Object returnObject = RPCProtocolUtil.decode(wrapper, false);
+		Object returnObject = ProtocolFactory.getProtocol().decode(wrapper, false);
 		if(returnObject instanceof Boolean){
 			return false;
 		}

@@ -9,10 +9,10 @@ import org.apache.mina.common.IoFutureListener;
 import org.apache.mina.common.IoSession;
 import org.apache.mina.common.WriteFuture;
 
-import com.bluedavy.rpc.AbstractClient;
-import com.bluedavy.rpc.Client;
 import com.bluedavy.rpc.RequestWrapper;
 import com.bluedavy.rpc.ResponseWrapper;
+import com.bluedavy.rpc.client.AbstractClient;
+import com.bluedavy.rpc.client.Client;
 
 public class MinaClient extends AbstractClient {
 
