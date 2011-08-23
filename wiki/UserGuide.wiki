@@ -1,6 +1,4 @@
 #labels UserGuide,MinaRPC,NettyRPC
-If u want to know how to use this rpc framework,pls see this page.
-
 The current version support two styles rpc.
   * RPC based on interface,when u use this style,u should implement an interface,then will call this implemention class directly.
   * RPC based on reflection,when u use this style,client use proxy to call server method,the framework will use reflection to call approviate instance and method.
