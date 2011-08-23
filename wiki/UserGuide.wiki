@@ -23,6 +23,8 @@ Use the rpc framework,u can realize rpc very simply.
     {{{
       public class MyMinaServer{
          public static void main(String[] args) throws Exception{
+              // use direct call RPC
+              ProtocolFactory.setType(TYPE.SIMPLE);
               Server server = new MinaServer();
               server.registerProcessor("myprocessor",new MyProcessor());
               ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
@@ -34,7 +36,18 @@ Use the rpc framework,u can realize rpc very simply.
     }}}
     Then your server will listen at 18888 and wait for request.
 === Client ===
-  * 
+  If u want to call MyProcessor,u can follow below steps.
+  * Get Client instance
+    {{{
+       ProtocolFactory.setType(TYPE.SIMPLE);
+       // clientNums mean how much connection to server,we appreciate single connection to the same serverIP & serverPort 
+       Client client = MinaClientFactory.getInstance().get(serverIP,serverPort,connectTimeOut,clientNums);
+    }}}
+  * Use Client to call
+    {{{
+       // rpcTimeout mean how long u will wait here for server return,datatype mean serialize/deserialize,current only support Java or Hessian
+       String result=client.invokeSync("hello",rpcTimeout,Protocol.HESSIAN_DATA);
+    }}}
 
 == Reflection RPC ==
 
