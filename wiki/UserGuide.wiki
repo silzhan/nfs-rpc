@@ -89,7 +89,8 @@ Use the rpc framework,u can realize rpc very simply.
   * Create client proxy
     {{{
         Map<String, Integer> methodTimeouts = new HashMap<String, Integer>();
-	methodTimeouts.put("*", timeout);
+	// so u can specialize some method timeout
+        methodTimeouts.put("*", timeout);
 	List<InetSocketAddress> servers = new ArrayList<InetSocketAddress>();
 	servers.add(new InetSocketAddress(serverIP, serverPort));
         HelloWorldService service = (HelloWorldService) Proxy.newProxyInstance(
