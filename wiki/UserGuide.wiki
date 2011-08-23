@@ -1,4 +1,4 @@
-#labels UserGuide
+#labels UserGuide,MinaRPC,NettyRPC
 If u want to know how to use this rpc framework,pls see this page.
 
 The current version support two styles rpc.
@@ -40,17 +40,71 @@ Use the rpc framework,u can realize rpc very simply.
   * Get Client instance
     {{{
        ProtocolFactory.setType(TYPE.SIMPLE);
-       // clientNums mean how much connection to server,we appreciate single connection to the same serverIP & serverPort 
+       // clientNums mean how much connection to server
+       // we appreciate single connection to the same serverIP & serverPort 
        Client client = MinaClientFactory.getInstance().get(serverIP,serverPort,connectTimeOut,clientNums);
     }}}
   * Use Client to call
     {{{
-       // rpcTimeout mean how long u will wait here for server return,datatype mean serialize/deserialize,current only support Java or Hessian
+       // rpcTimeout mean how long u will wait here for server return
+       // datatype mean serialize/deserialize
+       //       current only support Java or Hessian
        String result=client.invokeSync("hello",rpcTimeout,Protocol.HESSIAN_DATA);
     }}}
 
 == Reflection RPC ==
 
+=== Server ===
+
+  * Your processor
+   {{{
+       public interface HelloWorldService{
+           public String sayHello(String word);
+       }
+       public class HelloWorldComponent implements HelloWorldService{
+           public String sayHello(String word){
+              return word + " return by server";
+           }
+       }
+   }}}
+
+  * Register processor instance & start server
+   {{{
+     public class MyMinaServer{
+         public static void main(String[] args) throws Exception{
+              // use direct call RPC
+              ProtocolFactory.setType(TYPE.SIMPLE);
+              Server server = new MinaServer();
+              server.registerProcessor("helloworld",new HelloWorldComponent());
+              ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
+	      ExecutorService threadPool = new ThreadPoolExecutor(20, 100,
+				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);
+	      server.start(18888, threadPool);
+         }
+      }
+   }}}
+
+=== Client ===
+
+  * Create client proxy
+    {{{
+        Map<String, Integer> methodTimeouts = new HashMap<String, Integer>();
+	methodTimeouts.put("*", timeout);
+	List<InetSocketAddress> servers = new ArrayList<InetSocketAddress>();
+	servers.add(new InetSocketAddress(serverIP, serverPort));
+        HelloWorldService service = (HelloWorldService) Proxy.newProxyInstance(
+				this.getClass().getClassLoader(),
+				new Class<?>[] { HelloWorldService.class },
+				new MinaClientInvocationHandler(servers, clientNums,connectTimeout, "helloworld", methodTimeouts,datatype));
+    }}}
+  * Use proxy to call
+    {{{
+       String result = service.sayHello("hello");
+    }}}
+   
 = Netty RPC =
 
-= Grizzly RPC =
+  It's very similiar to Mina RPC,u only need make below changes: 
+  * MinaServer to NettyServer;
+  * MinaClientFactory to NettyClientFactory;
+  * MinaClientInvocationHandler to NettyClientInvocationHandler;
