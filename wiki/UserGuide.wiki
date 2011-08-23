@@ -20,6 +20,19 @@ Use the rpc framework,u can realize rpc very simply.
       }
     }}}
   * Register processor & start server
+    {{{
+      public class MyMinaServer{
+         public static void main(String[] args) throws Exception{
+              Server server = new MinaServer();
+              server.registerProcessor("myprocessor",new MyProcessor());
+              ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
+	      ExecutorService threadPool = new ThreadPoolExecutor(20, 100,
+				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);
+	      server.start(18888, threadPool);
+         }
+      }
+    }}}
+    Then your server will listen at 18888 and wait for request.
 === Client ===
   * 
 
