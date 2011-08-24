@@ -21,3 +21,33 @@
   }}}
 
 = Intergrate with other network framework =
+
+== Server ==
+
+  * Implement Server Interface;
+  * When your server receive message,you can call ProtocolFactory.getServerHandler().handleRequest(request) to handle the requestWrapper,pls see MinaServerHandler to learn more;
+
+== Serialize/Deserialize ==
+
+  * Implement ByteBufferWrapper Interface,pls see MinaByteBufferWrapper to learn more;
+  * In where u need serialize,u can call ProtocolFactory.getProtocol().encode(// receive object, // your ByteBufferWrapper),pls see MinaProtocolEncoder to learn more;
+  * In where u need deserialize,u can call ProtocolFactory.getProtocol().decode(// your ByteBufferWrapper, // return value),pls see MinaProtocolDecoder to learn more;
+
+== Client ==
+
+  * Extend AbstractClient to implement sendRequest method,pls see MinaClient to learn more;
+  * Extend AbstractClientFactory to implement createClient method,pls see MinaClientFactory to learn more;
+  * If u need use rpc based on reflection,extend AbstractInvocationHandler to implement getClientFactory method,pls see MinaClientInvocationHandler to learn more;
+  * When client receive response,u only need to call client.putResponse; 
+
+== Benchmak ==
+
+=== For Reflection RPC ===
+  * Extend AbstractRPCBenchmarkClient & AbstractRPCBenchmarkServer;
+  * client startup args: -Dwrite.statistics=false BenchmarkClient serverIP serverPort concurrents timeout datatype requestSize runtime(seconds) clientNums
+  * server startup args: listenPort maxThreads responseSize
+  * welcome submit your code or benchmark results.
+
+=== For Direct Call RPC ===
+  * Extend AbstractSimpleProcessorBenchmarkClient & AbstractSimpleProcessorBenchmarkServer;
+  * welcome submit your code or benchmark results.
