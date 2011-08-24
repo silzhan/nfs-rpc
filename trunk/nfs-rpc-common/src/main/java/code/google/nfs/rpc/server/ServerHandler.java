@@ -14,8 +14,14 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public interface ServerHandler {
 
+	/**
+	 * register business handler,provide for Server
+	 */
 	public void registerProcessor(String instanceName, Object instance);
 
+	/**
+	 * handle the request
+	 */
 	public ResponseWrapper handleRequest(final RequestWrapper request);
 
 }

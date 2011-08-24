@@ -7,8 +7,6 @@ package code.google.nfs.rpc;
  */
 import java.util.concurrent.atomic.AtomicInteger;
 
-import code.google.nfs.rpc.protocol.Protocol;
-
 /**
  * RequestWrapper
  * 
@@ -32,26 +30,26 @@ public class RequestWrapper {
 	
 	private int id = 0;
 	
-	private int dataType = Protocol.HESSIAN_DATA;
+	private Integer codecType = Codecs.HESSIAN_CODEC;
 	
-	public RequestWrapper(Object message,int timeout,int dataType){
-		this(message,timeout,incId.incrementAndGet(),dataType);
+	public RequestWrapper(Object message,int timeout,Integer codecType){
+		this(message,timeout,incId.incrementAndGet(),codecType);
 	}
 	
-	public RequestWrapper(Object message,int timeout,int id,int dataType){
+	public RequestWrapper(Object message,int timeout,int id,Integer codecType){
 		this.message = message;
 		this.id = id;
 		this.timeout = timeout;
-		this.dataType = dataType;
+		this.codecType = codecType;
 	}
 
 	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
-						  Object[] requestObjects,int timeout,int dataType){
-		this(targetInstanceName,methodName,argTypes,requestObjects,timeout,incId.incrementAndGet(),dataType);
+						  Object[] requestObjects,int timeout,Integer codecType){
+		this(targetInstanceName,methodName,argTypes,requestObjects,timeout,incId.incrementAndGet(),codecType);
 	}
 
 	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
-						  Object[] requestObjects,int timeout,int id,int dataType){
+						  Object[] requestObjects,int timeout,int id,Integer codecType){
 		this.requestObjects = requestObjects;
 		this.id = id;
 		this.timeout = timeout;
@@ -60,8 +58,8 @@ public class RequestWrapper {
 		this.argTypes = argTypes;
 	}
 
-	public int getDataType() {
-		return dataType;
+	public Integer getCodecType() {
+		return codecType;
 	}
 	
 	public Object getMessage() {

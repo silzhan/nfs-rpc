@@ -5,7 +5,10 @@ package code.google.nfs.rpc.protocol;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
-import code.google.nfs.rpc.Coders;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import code.google.nfs.rpc.Codecs;
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 
@@ -28,6 +31,8 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public class SimpleProcessorProtocol implements Protocol{
 	
+	private static final Log LOGGER = LogFactory.getLog(SimpleProcessorProtocol.class);
+	
 	private static final int HEADER_LEN = 1 * 8 + 3 * 4;
 	
 	private static final byte VERSION = (byte)1;
@@ -48,33 +53,28 @@ public class SimpleProcessorProtocol implements Protocol{
 		if(message instanceof RequestWrapper){
 			try{
 				RequestWrapper wrapper = (RequestWrapper) message;
-				dataType = wrapper.getDataType();
-				body = Coders.getEncoder(String.valueOf(dataType)).encode(wrapper.getMessage()); 
+				dataType = wrapper.getCodecType();
+				body = Codecs.getEncoder(dataType).encode(wrapper.getMessage()); 
 				id = wrapper.getId();
 				timeout = wrapper.getTimeout();
 			}
 			catch(Exception e){
-				e.printStackTrace();
-				// TODO: 处理异常
-				// LOGGER.error("serialize request object error",e);
-				// TODO: 直接创建一个响应返回，避免需要等到超时
+				LOGGER.error("encode request object error",e);
 				throw e;
 			}
 		}
 		else{
 			ResponseWrapper wrapper = (ResponseWrapper) message;
 			try{
-				dataType = wrapper.getDataType();
-				body = Coders.getEncoder(String.valueOf(dataType)).encode(wrapper.getResponse()); 
+				dataType = wrapper.getCodecType();
+				body = Codecs.getEncoder(dataType).encode(wrapper.getResponse()); 
 				id = wrapper.getRequestId();
 			}
 			catch(Exception e){
-				// TODO: 处理异常
-				e.printStackTrace();
-				// LOGGER.error("serialize response object error",e);
-				// 仍然创建响应客户端，以便客户端快速接到响应做相应的处理
-				wrapper.setResponse(new Exception("serialize response object error",e));
-				body = Coders.getEncoder(String.valueOf(wrapper.getDataType())).encode(wrapper.getResponse()); 
+				LOGGER.error("encode response object error",e);
+				// still create response,so client can get it
+				wrapper.setResponse(new Exception("encode response object error",e));
+				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse()); 
 			}
 			type = RESPONSE;
 		}
@@ -127,7 +127,7 @@ public class SimpleProcessorProtocol implements Protocol{
         		ResponseWrapper responseWrapper = new ResponseWrapper();
             	responseWrapper.setRequestId(requestId);
             	responseWrapper.setResponse(body);
-            	responseWrapper.setDataType(dataType);
+            	responseWrapper.setCodecType(dataType);
 	        	return responseWrapper;
         	}
         	else{

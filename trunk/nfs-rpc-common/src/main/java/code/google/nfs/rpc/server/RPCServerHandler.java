@@ -9,7 +9,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import code.google.nfs.rpc.Coders;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import code.google.nfs.rpc.Codecs;
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 /**
@@ -19,6 +22,8 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public class RPCServerHandler implements ServerHandler {
 
+	private static final Log LOGGER = LogFactory.getLog(RPCServerHandler.class);
+	
 	// Server Processors     key: servicename    value: service instance
 	private static Map<String, Object> processors = new HashMap<String, Object>();
 	
@@ -44,7 +49,7 @@ public class RPCServerHandler implements ServerHandler {
 	public ResponseWrapper handleRequest(final RequestWrapper request){
 		ResponseWrapper responseWrapper = new ResponseWrapper();
 		responseWrapper.setRequestId(request.getId());
-		responseWrapper.setDataType(request.getDataType());
+		responseWrapper.setCodecType(request.getCodecType());
 		String targetInstanceName = request.getTargetInstanceName();
 		String methodName = request.getMethodName();
 		String[] argTypes = request.getArgTypes();
@@ -66,20 +71,32 @@ public class RPCServerHandler implements ServerHandler {
 				}
 				requestObjects = new Object[argTypes.length];
 				method = cacheMethods.get(methodKeyBuilder.toString());
+				if(method == null){
+					throw new Exception("no method: "+methodKeyBuilder.toString()+" find in "+targetInstanceName+" on the server");
+				}
 				Object[] tmprequestObjects = request
 						.getRequestObjects();
 				for (int i = 0; i < tmprequestObjects.length; i++) {
-					requestObjects[i] = Coders.getDecoder(String.valueOf(request.getDataType())).decode((byte[])tmprequestObjects[i]);
+					try{
+						requestObjects[i] = Codecs.getDecoder(request.getCodecType()).decode((byte[])tmprequestObjects[i]);
+					}
+					catch(Exception e){
+						throw new Exception("decode request object args error",e);
+					}
 				}
 			} 
 			else {
 				method = processor.getClass().getMethod(methodName,
 						new Class<?>[] {});
+				if(method == null){
+					throw new Exception("no method: "+methodName+" find in "+targetInstanceName+" on the server");
+				}
 				requestObjects = new Object[] {};
 			}
 			responseWrapper.setResponse(method.invoke(processor, requestObjects));
 		}
 		catch(Exception e){
+			LOGGER.error("server handle request error",e);
 			responseWrapper.setException(e);
 		}
 		return responseWrapper;

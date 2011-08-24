@@ -5,7 +5,10 @@ package code.google.nfs.rpc.server;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
-import code.google.nfs.rpc.Coders;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import code.google.nfs.rpc.Codecs;
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 /**
@@ -15,6 +18,8 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public class SimpleProcessorServerHandler implements ServerHandler{
 
+	private static final Log LOGGER = LogFactory.getLog(SimpleProcessorServerHandler.class);
+	
 	private ServerProcessor processor = null;
 	
 	public void registerProcessor(String instanceName,Object instance){
@@ -24,12 +29,13 @@ public class SimpleProcessorServerHandler implements ServerHandler{
 	public ResponseWrapper handleRequest(final RequestWrapper request){
 		ResponseWrapper responseWrapper = new ResponseWrapper();
 		responseWrapper.setRequestId(request.getId());
-		responseWrapper.setDataType(request.getDataType());
+		responseWrapper.setCodecType(request.getCodecType());
 		try{
-			Object requestObject = Coders.getDecoder(String.valueOf(request.getDataType())).decode((byte[])request.getMessage());
+			Object requestObject = Codecs.getDecoder(request.getCodecType()).decode((byte[])request.getMessage());
 			responseWrapper.setResponse(processor.handle(requestObject));
 		}
 		catch(Exception e){
+			LOGGER.error("server direct call handler to handle request error",e);
 			responseWrapper.setException(e);
 		}
 		return responseWrapper;

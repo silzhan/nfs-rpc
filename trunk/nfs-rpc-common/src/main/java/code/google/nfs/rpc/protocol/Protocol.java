@@ -11,10 +11,6 @@ package code.google.nfs.rpc.protocol;
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
 public interface Protocol {
-
-	public static final int JAVA_DATA = 1;
-	
-	public static final int HESSIAN_DATA = 2;
 	
 	/**
 	 * encode Message to byte & write to network framework
