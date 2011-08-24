@@ -1,0 +1,16 @@
+#labels DeveloperGuide,CustomSerialize,CustomProtocol,Intergrateothernetworkframework
+#For Developers who want to custom serialize/deserialize | protocol,or intergrate with other network framework.
+
+= Custom Serialize/Deserialize  =
+
+  * Implements Decoder & Encoder interface;
+  * Register Your Decoder & Encoder implemenation to Coders;
+   {{{
+      Coders.addEncoder("3",// your encoder class);
+      Coders.addDecoder("3",// your decoder class);
+   }}}
+  * When u call AbstractClient.invokeSync,u can set datatype to 3,then framework will use your encoder & decoder.
+
+= Custom Protocol =
+
+= Intergrate with other network framework =
