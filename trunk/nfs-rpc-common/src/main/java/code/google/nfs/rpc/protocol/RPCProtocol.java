@@ -21,7 +21,7 @@ import code.google.nfs.rpc.ResponseWrapper;
  * Request Protocol
  * 	VERSION(1B):   
  *  TYPE(1B):      request/response 
- *  DATATYPE(1B):  serialize/deserialize type
+ *  CODECTYPE(1B):  serialize/deserialize type
  *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  KEEPED(1B):    
@@ -186,7 +186,7 @@ public class RPCProtocol implements Protocol {
         			wrapper.setReaderIndex(originPos);
         			return errorObject;
         		}
-        		int dataType = wrapper.readByte();
+        		int codecType = wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
@@ -237,7 +237,7 @@ public class RPCProtocol implements Protocol {
 					args[i] = argByte;
 				}
         		RequestWrapper requestWrapper = new RequestWrapper(targetInstanceName, methodName, 
-        														   argTypes, args, timeout, requestId, dataType);
+        														   argTypes, args, timeout, requestId, codecType);
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
@@ -245,7 +245,7 @@ public class RPCProtocol implements Protocol {
         			wrapper.setReaderIndex(originPos);
         			return errorObject;
         		}
-        		int dataType = wrapper.readByte();
+        		int codecType = wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
@@ -262,7 +262,7 @@ public class RPCProtocol implements Protocol {
             	ResponseWrapper responseWrapper = new ResponseWrapper();
             	responseWrapper.setRequestId(requestId);
             	responseWrapper.setResponse(bodyBytes);
-            	responseWrapper.setCodecType(dataType);
+            	responseWrapper.setCodecType(codecType);
 	        	return responseWrapper;
         	}
         	else{
