@@ -3,7 +3,7 @@
 
 = Custom Serialize/Deserialize  =
 
-  * Implements Decoder & Encoder interface;
+  * Implement Decoder & Encoder interface;
   * Register Your Decoder & Encoder implemenation to Coders;
    {{{
       Coders.addEncoder("3",// your encoder class);
@@ -12,5 +12,23 @@
   * When u call AbstractClient.invokeSync,u can set datatype to 3,then framework will use your encoder & decoder.
 
 = Custom Protocol =
+
+  * Implement Protocol interface,u can see RPCProtocol or SimpleProcessorProtocol to learn how to implement it;
+  * Implement ServerHandler interface,u can see RPCServerHandler or SimpleProcessorServerHandler to learn how to implement it;
+  * Modify ProtocolFactory,register your protocol;
+  {{{
+    public static void setProtocol(TYPE type){
+		if(type == TYPE.SIMPLE){
+			protocol = new SimpleProcessorProtocol();
+			serverHandler = new SimpleProcessorServerHandler();
+		}
+		else if(type == TYPE.REFLECTION){
+			protocol = new RPCProtocol();
+			serverHandler = new RPCServerHandler();
+		}
+                // add your protocol
+	}
+  }}}
+  * When start your client & server, call ProtocolFactory.setProtocol(// your protocol type).
 
 = Intergrate with other network framework =
