@@ -1,1 +1,1 @@
-sh clientcommon.sh "nettylib" "com.bluedavy.rpc.netty.benchmark.NettyRPCBenchmarkClient" "benchmark.log.netty.rpc"
+sh clientcommon.sh "nettylib" "code.google.nfs.rpc.netty.benchmark.NettyRPCBenchmarkClient" "benchmark.log.netty.rpc"
