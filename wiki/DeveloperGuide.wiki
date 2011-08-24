@@ -15,20 +15,9 @@
 
   * Implement Protocol interface,u can see RPCProtocol or SimpleProcessorProtocol to learn how to implement it;
   * Implement ServerHandler interface,u can see RPCServerHandler or SimpleProcessorServerHandler to learn how to implement it;
-  * Modify ProtocolFactory,register your protocol;
+  * whens start your client & server,use your protocol(only once enough);
   {{{
-    public static void setProtocol(TYPE type){
-		if(type == TYPE.SIMPLE){
-			protocol = new SimpleProcessorProtocol();
-			serverHandler = new SimpleProcessorServerHandler();
-		}
-		else if(type == TYPE.REFLECTION){
-			protocol = new RPCProtocol();
-			serverHandler = new RPCServerHandler();
-		}
-                // add your protocol
-	}
+     ProtocolFactory.setProtocol(// your protocol class, // your serverhandler class);
   }}}
-  * When start your client & server, call ProtocolFactory.setProtocol(// your protocol type).
 
 = Intergrate with other network framework =
