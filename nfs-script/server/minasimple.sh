@@ -1,1 +1,1 @@
-sh servercommon.sh "minalib" "com.bluedavy.rpc.mina.benchmark.MinaSimpleBenchmarkServer" "server.log.mina.simple"
+sh servercommon.sh "minalib" "code.google.nfs.rpc.mina.benchmark.MinaSimpleBenchmarkServer" "server.log.mina.simple"
