@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
 
   <name>common</name>
-  <url>http://bluedavy.com/projects/rpc-benchmark/</url>
+  <url>http://bluedavy.com/projects/nfs-rpc/</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -45,9 +45,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-	  <groupId>hessian</groupId>
+	  <groupId>com.caucho</groupId>
 	  <artifactId>hessian</artifactId>
-	  <version>3.0.13</version>
+	  <version>4.0.7</version>
 	</dependency>
     <dependency>
         <groupId>commons-logging</groupId>

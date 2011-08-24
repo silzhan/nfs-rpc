@@ -14,6 +14,8 @@ import com.bluedavy.rpc.client.ClientFactory;
 public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 
 	private static final AtomicInteger fileNameIndex = new AtomicInteger();
+	
+	private static final AtomicInteger errorFileNameIndex = new AtomicInteger();
 
 	private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
 			"yyyy-MM-dd HH:mm:ss");
@@ -29,6 +31,8 @@ public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 	private boolean running = true;
 
 	private BufferedWriter writer;
+	
+	private BufferedWriter errorWriter;
 
 	private ClientFactory factory;
 
@@ -58,8 +62,10 @@ public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 		this.endTime = endTime;
 		File file = new File("benchmark.results."
 				+ fileNameIndex.incrementAndGet());
+		File errorFile = new File("benchmark.error.results." + errorFileNameIndex.incrementAndGet());
 		try {
 			this.writer = new BufferedWriter(new FileWriter(file));
+			this.errorWriter = new BufferedWriter(new FileWriter(errorFile));
 		} catch (Exception e) {
 			// IGNORE
 		}
@@ -83,14 +89,16 @@ public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 				} else {
 					System.err.println(dateFormat.format(new Date())
 							+ " server return response is null");
+					errorWriter.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
 				}
 			} catch (Exception e) {
-				System.out.println(dateFormat.format(new Date()));
 				e.printStackTrace();
-				long[] responseTime = new long[2];
-				responseTime[0] = System.currentTimeMillis();
-				responseTime[1] = responseTime[0] - beginTime;
-				// errorResponseTimes.add(responseTime);
+				try{
+					errorWriter.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
+				}
+				catch(Exception t){
+					// IGNORE
+				}
 			}
 			if (System.currentTimeMillis() >= endTime) {
 				running = false;
@@ -98,9 +106,13 @@ public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 		}
 		try {
 			writer.close();
-			latch.countDown();
-		} catch (Exception e) {
+			errorWriter.close();
+		} 
+		catch (Exception e) {
 			// IGNORE
+		}
+		finally{
+			latch.countDown();
 		}
 	}
 
