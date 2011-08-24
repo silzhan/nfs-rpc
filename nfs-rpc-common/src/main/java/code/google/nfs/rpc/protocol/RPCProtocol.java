@@ -8,7 +8,10 @@ package code.google.nfs.rpc.protocol;
 import java.util.ArrayList;
 import java.util.List;
 
-import code.google.nfs.rpc.Coders;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import code.google.nfs.rpc.Codecs;
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 
@@ -61,6 +64,8 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public class RPCProtocol implements Protocol {
 	
+	private static final Log LOGGER = LogFactory.getLog(RPCProtocol.class);
+	
 	private static final int REQUEST_HEADER_LEN = 1 * 8 + 5 * 4;
 	
 	private static final int RESPONSE_HEADER_LEN = 1 * 8 + 2 * 4;
@@ -92,7 +97,7 @@ public class RPCProtocol implements Protocol {
 				}
 				Object[] requestObjects = wrapper.getRequestObjects();
 				for (Object requestArg : requestObjects) {
-					byte[] requestArgByte = Coders.getEncoder(String.valueOf(wrapper.getDataType())).encode(requestArg);
+					byte[] requestArgByte = Codecs.getEncoder(wrapper.getCodecType()).encode(requestArg);
 					requestArgs.add(requestArgByte);
 					requestArgsLen += requestArgByte.length;
 				}
@@ -104,7 +109,7 @@ public class RPCProtocol implements Protocol {
 				ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 				byteBuffer.writeByte(VERSION);
 				byteBuffer.writeByte(type);
-				byteBuffer.writeByte((byte)wrapper.getDataType());
+				byteBuffer.writeByte((byte)wrapper.getCodecType().intValue());
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
@@ -132,10 +137,7 @@ public class RPCProtocol implements Protocol {
 				return byteBuffer;
 			}
 			catch(Exception e){
-				e.printStackTrace();
-				// TODO: 处理异常
-				// LOGGER.error("serialize request object error",e);
-				// TODO: 直接创建一个响应返回，避免需要等到超时
+				LOGGER.error("encode request object error",e);
 				throw e;
 			}
 		}
@@ -143,23 +145,21 @@ public class RPCProtocol implements Protocol {
 			ResponseWrapper wrapper = (ResponseWrapper) message;
 			byte[] body = null;
 			try{
-				body = Coders.getEncoder(String.valueOf(wrapper.getDataType())).encode(wrapper.getResponse());
+				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
 				id = wrapper.getRequestId();
 			}
 			catch(Exception e){
-				// TODO: 处理异常
-				e.printStackTrace();
-				// LOGGER.error("serialize response object error",e);
-				// 仍然创建响应客户端，以便客户端快速接到响应做相应的处理
+				LOGGER.error("encode response object error", e);
+				// still create responsewrapper,so client can get exception
 				wrapper.setResponse(new Exception("serialize response object error",e));
-				body = Coders.getEncoder(String.valueOf(wrapper.getDataType())).encode(wrapper.getResponse());
+				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
 			}
 			type = RESPONSE;
 			int capacity = RESPONSE_HEADER_LEN + body.length;
 			ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 			byteBuffer.writeByte(VERSION);
 			byteBuffer.writeByte(type);
-			byteBuffer.writeByte((byte)wrapper.getDataType());
+			byteBuffer.writeByte((byte)wrapper.getCodecType().intValue());
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
@@ -179,7 +179,6 @@ public class RPCProtocol implements Protocol {
         	return errorObject;
         }
         byte version = wrapper.readByte();
-        // 版本1协议的解析方式
         if(version == (byte)1){
         	byte type = wrapper.readByte();
         	if(type == REQUEST){
@@ -263,7 +262,7 @@ public class RPCProtocol implements Protocol {
             	ResponseWrapper responseWrapper = new ResponseWrapper();
             	responseWrapper.setRequestId(requestId);
             	responseWrapper.setResponse(bodyBytes);
-            	responseWrapper.setDataType(dataType);
+            	responseWrapper.setCodecType(dataType);
 	        	return responseWrapper;
         	}
         	else{

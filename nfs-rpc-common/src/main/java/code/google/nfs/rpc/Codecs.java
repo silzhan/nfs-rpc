@@ -14,38 +14,41 @@ import code.google.nfs.rpc.protocol.HessianDecoder;
 import code.google.nfs.rpc.protocol.HessianEncoder;
 import code.google.nfs.rpc.protocol.JavaDecoder;
 import code.google.nfs.rpc.protocol.JavaEncoder;
-import code.google.nfs.rpc.protocol.Protocol;
 /**
  * Encoder & Decoder Register
  * 
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
-public class Coders {
+public class Codecs {
 	
-	private static Map<String, Encoder> encoders = new ConcurrentHashMap<String, Encoder>();
+	public static final Integer JAVA_CODEC = 1;
 	
-	private static Map<String, Decoder> decoders = new ConcurrentHashMap<String, Decoder>();
+	public static final Integer HESSIAN_CODEC = 2;
+	
+	private static Map<Integer, Encoder> encoders = new ConcurrentHashMap<Integer, Encoder>();
+	
+	private static Map<Integer, Decoder> decoders = new ConcurrentHashMap<Integer, Decoder>();
 	
 	static{
-		addEncoder(String.valueOf(Protocol.JAVA_DATA), new JavaEncoder());
-		addEncoder(String.valueOf(Protocol.HESSIAN_DATA), new HessianEncoder());
-		addDecoder(String.valueOf(Protocol.JAVA_DATA), new JavaDecoder());
-		addDecoder(String.valueOf(Protocol.HESSIAN_DATA), new HessianDecoder());
+		addEncoder(JAVA_CODEC, new JavaEncoder());
+		addEncoder(HESSIAN_CODEC, new HessianEncoder());
+		addDecoder(JAVA_CODEC, new JavaDecoder());
+		addDecoder(HESSIAN_CODEC, new HessianDecoder());
 	}
 	
-	public static void addEncoder(String encoderKey,Encoder encoder){
+	public static void addEncoder(Integer encoderKey,Encoder encoder){
 		encoders.put(encoderKey, encoder);
 	}
 	
-	public static void addDecoder(String decoderKey,Decoder decoder){
+	public static void addDecoder(Integer decoderKey,Decoder decoder){
 		decoders.put(decoderKey, decoder);
 	}
 	
-	public static Encoder getEncoder(String encoderKey){
+	public static Encoder getEncoder(Integer encoderKey){
 		return encoders.get(encoderKey);
 	}
 	
-	public static Decoder getDecoder(String decoderKey){
+	public static Decoder getDecoder(Integer decoderKey){
 		return decoders.get(decoderKey);
 	}
 	

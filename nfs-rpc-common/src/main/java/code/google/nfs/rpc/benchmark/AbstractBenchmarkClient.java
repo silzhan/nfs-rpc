@@ -23,7 +23,7 @@ import java.util.concurrent.CyclicBarrier;
  * Abstract benchmark client,test for difference scenes
  * 
  * Usage: -Dwrite.statistics=false BenchmarkClient serverIP serverPort
- * concurrents timeout datatype requestSize runtime(seconds) clientNums
+ * concurrents timeout codectype requestSize runtime(seconds) clientNums
  * 
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
@@ -76,14 +76,14 @@ public abstract class AbstractBenchmarkClient {
 	public void run(String[] args) throws Exception {
 		if (args == null || (args.length != 7 && args.length != 8)) {
 			throw new IllegalArgumentException(
-					"must give seven or eight args, serverIP serverPort concurrents timeout datatype requestSize runtime(seconds) clientNums");
+					"must give seven or eight args, serverIP serverPort concurrents timeout codectype requestSize runtime(seconds) clientNums");
 		}
 
 		final String serverIP = args[0];
 		final int serverPort = Integer.parseInt(args[1]);
 		final int concurrents = Integer.parseInt(args[2]);
 		final int timeout = Integer.parseInt(args[3]);
-		final int datatype = Integer.parseInt(args[4]);
+		final int codectype = Integer.parseInt(args[4]);
 		final int requestSize = Integer.parseInt(args[5]);
 		runtime = Integer.parseInt(args[6]);
 		final long endtime = System.currentTimeMillis() + runtime * 1000;
@@ -105,7 +105,7 @@ public abstract class AbstractBenchmarkClient {
 		startInfo.append(",concurrents is: ").append(concurrents);
 		startInfo.append(",clientNums is: ").append(clientNums);
 		startInfo.append(",timeout is:").append(timeout);
-		startInfo.append(",datatype is:").append(datatype);
+		startInfo.append(",codectype is:").append(codectype);
 		startInfo.append(",requestSize is:").append(requestSize);
 		startInfo.append(" bytes,the benchmark will end at:").append(
 				dateFormat.format(calendar.getTime()));
@@ -115,7 +115,7 @@ public abstract class AbstractBenchmarkClient {
 		CountDownLatch latch = new CountDownLatch(concurrents);
 		for (int i = 0; i < concurrents; i++) {
 			Thread thread = new Thread(getRunnable(serverIP, serverPort,
-					clientNums, timeout, datatype, requestSize, barrier, latch,
+					clientNums, timeout, codectype, requestSize, barrier, latch,
 					endtime), "benchmarkclient-" + i);
 			thread.start();
 		}
@@ -255,6 +255,8 @@ public abstract class AbstractBenchmarkClient {
 
 		System.out.println("----------Benchmark Statistics--------------");
 		System.out.println(" Concurrents: " + concurrents);
+		System.out.println(" CodecType: " + codectype);
+		System.out.println(" RequestSize: " + requestSize + " bytes");
 		System.out.println(" Runtime: " + runtime + " seconds");
 		System.out.println(" Benchmark Time: " + times.keySet().size());
 		long benchmarkRequest = allRequestSum + allErrorRequestSum;
@@ -315,7 +317,7 @@ public abstract class AbstractBenchmarkClient {
 	}
 
 	public abstract Runnable getRunnable(String targetIP, int targetPort,
-			int clientNums, int rpcTimeout, int dataType, int requestSize,
+			int clientNums, int rpcTimeout, int codecType, int requestSize,
 			CyclicBarrier barrier, CountDownLatch latch, long endTime);
 
 }

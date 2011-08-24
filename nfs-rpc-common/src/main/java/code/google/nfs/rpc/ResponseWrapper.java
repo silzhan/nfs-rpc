@@ -5,7 +5,6 @@ package code.google.nfs.rpc;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
-import code.google.nfs.rpc.protocol.Protocol;
 
 /**
  * ResponseWrapper
@@ -22,14 +21,14 @@ public class ResponseWrapper {
 	
 	private Throwable exception = null;
 	
-	private int dataType = Protocol.JAVA_DATA;
+	private Integer codecType = Codecs.JAVA_CODEC;
 
-	public int getDataType() {
-		return dataType;
+	public Integer getCodecType() {
+		return codecType;
 	}
 
-	public void setDataType(int dataType) {
-		this.dataType = dataType;
+	public void setCodecType(Integer codecType) {
+		this.codecType = codecType;
 	}
 
 	public Integer getRequestId() {

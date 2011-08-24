@@ -21,14 +21,14 @@ import java.util.concurrent.CyclicBarrier;
 public abstract class AbstractRPCBenchmarkClient extends AbstractBenchmarkClient{
 
 	public Runnable getRunnable(String targetIP, int targetPort,
-			int clientNums, int rpcTimeout, int dataType, int requestSize,
+			int clientNums, int rpcTimeout, int codecType, int requestSize,
 			CyclicBarrier barrier, CountDownLatch latch, long endTime) {
 		Map<String, Integer> methodTimeouts = new HashMap<String, Integer>();
 		methodTimeouts.put("*", rpcTimeout);
 		List<InetSocketAddress> servers = new ArrayList<InetSocketAddress>();
 		servers.add(new InetSocketAddress(targetIP, targetPort));
 		return new RPCBenchmarkClientRunnable(
-				getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts, dataType), 
+				getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts, codecType), 
 				requestSize, barrier, latch,endTime);
 	}
 	

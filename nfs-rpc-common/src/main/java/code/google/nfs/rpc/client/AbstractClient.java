@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import code.google.nfs.rpc.Coders;
+import code.google.nfs.rpc.Codecs;
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 
@@ -26,6 +26,8 @@ public abstract class AbstractClient implements Client {
 
 	private static final Log LOGGER = LogFactory.getLog(AbstractClient.class);
 
+	private static final boolean isDebugEnabled = LOGGER.isDebugEnabled();
+	
 	private static final boolean isWarnEnabled = LOGGER.isWarnEnabled();
 
 	private static final long PRINT_CONSUME_MINTIME = Long.parseLong(System
@@ -54,7 +56,15 @@ public abstract class AbstractClient implements Client {
 		responses.put(wrapper.getId(), responseQueue);
 		ResponseWrapper responseWrapper = null;
 		try {
+			if(isDebugEnabled){
+				// for performance trace
+				LOGGER.debug("client ready to send message,request id: "+wrapper.getId());
+			}
 			sendRequest(wrapper, wrapper.getTimeout());
+			if(isDebugEnabled){
+				// for performance trace
+				LOGGER.debug("client write message to send buffer,wait for response,request id: "+wrapper.getId());
+			}
 		} 
 		catch (Exception e) {
 			responses.remove(wrapper.getId());
@@ -94,8 +104,7 @@ public abstract class AbstractClient implements Client {
 		try{
 			// do deserialize in business threadpool
 			if (responseWrapper.getResponse() instanceof byte[]) {
-				Object responseObject = Coders.getDecoder(
-						String.valueOf(responseWrapper.getDataType())).decode(
+				Object responseObject = Codecs.getDecoder(responseWrapper.getCodecType()).decode(
 						(byte[]) responseWrapper.getResponse());
 				if (responseObject instanceof Throwable) {
 					responseWrapper.setException((Throwable) responseObject);
