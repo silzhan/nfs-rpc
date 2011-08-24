@@ -1,63 +1,18 @@
 package com.bluedavy.rpc.benchmark;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import com.bluedavy.rpc.NamedThreadFactory;
 import com.bluedavy.rpc.ProtocolFactory;
 import com.bluedavy.rpc.ProtocolFactory.TYPE;
-import com.bluedavy.rpc.server.Server;
 import com.bluedavy.rpc.server.ServerProcessor;
 
-/**
- * 用于Simple Processor Pattern Benchmark测试的服务器端 性能数据暂时均在客户端收集，以客户端数据为准 Usage: BenchmarkServer
- * listenPort maxThreads responseSize
- */
-public abstract class AbstractSimpleProcessorBenchmarkServer {
+public abstract class AbstractSimpleProcessorBenchmarkServer extends AbstractBenchmarkServer{
 
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat(
-			"yyyy-MM-dd HH:mm:ss");
-
-	/**
-	 * 外部可传入的参数为： args[0]: 监听端口 args[1]: server线程数 args[2]: 返回的响应对象的大小
-	 * 
-	 * @param args
-	 * @throws Exception
-	 */
-	public void run(String[] args) throws Exception {
-		if (args == null || args.length != 3) {
-			throw new IllegalArgumentException(
-					"must give three args: listenPort | maxThreads | responseSize");
-		}
-		int listenPort = Integer.parseInt(args[0]);
-		int maxThreads = Integer.parseInt(args[1]);
-		final int responseSize = Integer.parseInt(args[2]);
-		System.out.println(dateFormat.format(new Date())
-				+ " ready to start server,listenPort is: " + listenPort
-				+ ",maxThreads is:" + maxThreads + ",responseSize is:"
-				+ responseSize + " bytes");
-
+	public Object getServerProcessor(final int responseSize) {
 		ProtocolFactory.setProtocol(TYPE.SIMPLE);
-		Server server = getServer();
-		server.registerProcessor("testservice", new ServerProcessor() {
+		return new ServerProcessor() {
 			public Object handle(Object request) throws Exception {
 				return new ResponseObject(responseSize);
 			}
-		});
-		ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
-		ExecutorService threadPool = new ThreadPoolExecutor(20, maxThreads,
-				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);
-		server.start(listenPort, threadPool);
+		};
 	}
-
-	/**
-	 * 获取具体的Server Instance
-	 */
-	public abstract Server getServer();
 
 }
