@@ -1,5 +1,10 @@
 package code.google.nfs.rpc.mina.client;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import java.io.IOException;
 
 import org.apache.commons.logging.Log;
@@ -8,12 +13,18 @@ import org.apache.mina.common.IoHandlerAdapter;
 import org.apache.mina.common.IoSession;
 
 import code.google.nfs.rpc.ResponseWrapper;
-
+/**
+ * Mina Client processor for receive message,handle exception
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class MinaClientProcessor extends IoHandlerAdapter {
 
 //	private static final int MIN_RESPONSES = 60;
 	
 	private static final Log LOGGER = LogFactory.getLog(MinaClientProcessor.class);
+	
+	private static final boolean isDebugEnabled = LOGGER.isDebugEnabled();
 	
 	private MinaClient client=null;
 	
@@ -42,6 +53,10 @@ public class MinaClientProcessor extends IoHandlerAdapter {
 			throw new Exception("receive message error,only support ResponseWrapper");
 		}
 		ResponseWrapper response = (ResponseWrapper)message;
+		if(isDebugEnabled){
+			// for performance trace
+			LOGGER.debug("receive response from server: "+session.getRemoteAddress()+", request id is:"+response.getRequestId());
+		}
 		client.putResponse(response);
 //		responses.add(response);
 //		receiveResponseIndex ++;
@@ -60,15 +75,14 @@ public class MinaClientProcessor extends IoHandlerAdapter {
 	
 	public void exceptionCaught(IoSession session, Throwable cause)
 			throws Exception {
-		// 不做复杂处理，任何filter chain上抛出的异常，全部关闭连接
 		if(!(cause instanceof IOException)){
-			LOGGER.error("catch some exception not IOException,so close session",cause);
-			session.close();
-			cause.printStackTrace();
+			// only log
+			LOGGER.error("catch some exception not IOException",cause);
 		}
 	}
 
 	public void sessionClosed(IoSession session) throws Exception {
+		LOGGER.warn("session closed,server is: "+session.getRemoteAddress());
 		factory.removeClient(key,client);
 	}
 	

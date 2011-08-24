@@ -1,5 +1,10 @@
 package code.google.nfs.rpc.mina.client;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.Executors;
@@ -18,7 +23,11 @@ import code.google.nfs.rpc.client.AbstractClientFactory;
 import code.google.nfs.rpc.client.Client;
 import code.google.nfs.rpc.mina.serialize.MinaProtocolCodecFilter;
 
-
+/**
+ * Mina Client Factory
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class MinaClientFactory extends AbstractClientFactory {
 
 	private static Log LOGGER = LogFactory.getLog(MinaClientFactory.class);
@@ -36,6 +45,7 @@ public class MinaClientFactory extends AbstractClientFactory {
 	private SocketConnector ioConnector;
 
 	private MinaClientFactory() {
+		// only one ioConnector,avoid create too many io processor thread
 		ioConnector = new SocketConnector(processorCount,
 				Executors.newCachedThreadPool(CONNECTOR_TFACTORY));
 	}
@@ -58,12 +68,11 @@ public class MinaClientFactory extends AbstractClientFactory {
 			cfg.setConnectTimeout(1);
 		}
 		cfg.getSessionConfig().setTcpNoDelay(true);
-		// 序列化/反序列化处理器
 		cfg.getFilterChain().addLast("objectserialize",new MinaProtocolCodecFilter());
 		SocketAddress targetAddress = new InetSocketAddress(targetIP,targetPort);
 		MinaClientProcessor processor = new MinaClientProcessor(this, key);
 		ConnectFuture connectFuture = ioConnector.connect(targetAddress, null,processor, cfg);
-		// 强制等待连接建立完毕或超时
+		// wait for connection established
 		connectFuture.join();
 
 		IoSession ioSession = connectFuture.getSession();
