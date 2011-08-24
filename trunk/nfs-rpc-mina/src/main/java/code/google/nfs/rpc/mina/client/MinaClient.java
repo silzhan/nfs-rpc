@@ -1,5 +1,10 @@
 package code.google.nfs.rpc.mina.client;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import java.net.InetSocketAddress;
 
 import org.apache.commons.logging.Log;
@@ -12,7 +17,11 @@ import org.apache.mina.common.WriteFuture;
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 import code.google.nfs.rpc.client.AbstractClient;
-
+/**
+ * Mina Client
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class MinaClient extends AbstractClient {
 
 	private static final Log LOGGER = LogFactory.getLog(MinaClient.class);
@@ -56,7 +65,6 @@ public class MinaClient extends AbstractClient {
 				catch (Exception e) {
 					// IGNORE, should not happen
 				}
-				// maybe是连接出了点问题，因此关闭连接
 				if (session.isConnected()) {
 					if (isWarnEnabled) {
 						LOGGER.warn("close the session because send request error,server:"
@@ -65,12 +73,12 @@ public class MinaClient extends AbstractClient {
 					session.close();
 				} 
 				else {
-					// TODO:
+					// TODO: 
 					MinaClientFactory.getInstance().removeClient(key, null);
 				}
 			}
 		});
-		// 如未完成，则直接抛出异常
+		// if not write to os send buffer in timeout range
 		if (!writeFuture.join(timeout)) {
 			String error = "write message to send buffer error,maybe sendbuffer is full,so blocked so long("
 					+ timeout + " ms),current need write requests: "+session.getScheduledWriteRequests()+",bytes is: "+session.getScheduledWriteBytes();

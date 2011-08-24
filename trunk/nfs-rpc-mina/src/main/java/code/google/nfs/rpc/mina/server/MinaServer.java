@@ -1,5 +1,10 @@
 package code.google.nfs.rpc.mina.server;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,7 +21,11 @@ import code.google.nfs.rpc.ProtocolFactory;
 import code.google.nfs.rpc.mina.serialize.MinaProtocolCodecFilter;
 import code.google.nfs.rpc.server.Server;
 
-
+/**
+ * Mina Server
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class MinaServer implements Server {
 
 	private static final Log LOGGER = LogFactory.getLog(MinaServer.class);

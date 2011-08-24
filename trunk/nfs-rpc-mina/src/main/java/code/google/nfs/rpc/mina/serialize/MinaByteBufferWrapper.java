@@ -1,9 +1,18 @@
 package code.google.nfs.rpc.mina.serialize;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import org.apache.mina.common.ByteBuffer;
 
 import code.google.nfs.rpc.protocol.ByteBufferWrapper;
-
+/**
+ * Implements ByteBufferWrapper based on ByteBuffer
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class MinaByteBufferWrapper implements ByteBufferWrapper {
 
 	private ByteBuffer byteBuffer;
@@ -12,8 +21,8 @@ public class MinaByteBufferWrapper implements ByteBufferWrapper {
 		;
 	}
 	
-	public MinaByteBufferWrapper(ByteBuffer byteBuffer){
-		this.byteBuffer = byteBuffer;
+	public MinaByteBufferWrapper(ByteBuffer in){
+		this.byteBuffer = in;
 	}
 	
 	public ByteBufferWrapper get(int capacity) {

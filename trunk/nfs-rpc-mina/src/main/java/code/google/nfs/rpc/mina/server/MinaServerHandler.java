@@ -1,5 +1,10 @@
 package code.google.nfs.rpc.mina.server;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
@@ -16,11 +21,14 @@ import org.apache.mina.common.WriteFuture;
 import code.google.nfs.rpc.ProtocolFactory;
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
-
+/**
+ * Mina Server Handler to receive message,handle exception
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class MinaServerHandler extends IoHandlerAdapter {
 
-	private static final Log LOGGER = LogFactory
-			.getLog(MinaServerHandler.class);
+	private static final Log LOGGER = LogFactory.getLog(MinaServerHandler.class);
 
 	private ExecutorService threadpool;
 
@@ -28,19 +36,16 @@ public class MinaServerHandler extends IoHandlerAdapter {
 		this.threadpool = threadpool;
 	}
 
-	@Override
 	public void exceptionCaught(IoSession session, Throwable cause)
 			throws Exception {
 		if (!(cause instanceof IOException)) {
-			cause.printStackTrace();
+			// only log
 			LOGGER.error(
 					"catch some exception not IOException,so close session",
 					cause);
-			session.close();
 		}
 	}
 
-	@Override
 	public void messageReceived(final IoSession session, final Object message)
 			throws Exception {
 		if (!(message instanceof RequestWrapper)) {
@@ -55,12 +60,12 @@ public class MinaServerHandler extends IoHandlerAdapter {
 					long beginTime = System.currentTimeMillis();
 					ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler().handleRequest(request);
 					int consumeTime = Integer.parseInt(""+ (System.currentTimeMillis() - beginTime));
-					// 说明客户端已超时，没必要返回
+					// already timeout,so not return
 					if (consumeTime >= request.getTimeout()) {
 						LOGGER.warn("timeout,so give up send response to client,requestId is:"
 								+ request.getId()
 								+ ",client is:"
-								+ session.getRemoteAddress());
+								+ session.getRemoteAddress()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
 						return;
 					}
 					WriteFuture wf = session.write(responseWrapper);
@@ -75,13 +80,14 @@ public class MinaServerHandler extends IoHandlerAdapter {
 					});
 				}
 			});
-		} catch (RejectedExecutionException exception) {
+		} 
+		catch (RejectedExecutionException exception) {
 			LOGGER.error("server threadpool full,threadpool maxsize is:"
 					+ ((ThreadPoolExecutor) threadpool).getMaximumPoolSize());
 			ResponseWrapper responseWrapper = new ResponseWrapper();
 			responseWrapper.setRequestId(request.getId());
 			responseWrapper
-					.setException(new Exception("server threadpool full"));
+					.setException(new Exception("server threadpool full,maybe because server is slow or too many requests"));
 			WriteFuture wf = session.write(responseWrapper);
 			wf.addListener(new IoFutureListener() {
 				public void operationComplete(IoFuture future) {
