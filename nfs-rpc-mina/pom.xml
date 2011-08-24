@@ -45,9 +45,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-	  <groupId>hessian</groupId>
+	  <groupId>com.caucho</groupId>
 	  <artifactId>hessian</artifactId>
-	  <version>3.0.13</version>
+	  <version>4.0.7</version>
 	  <scope>runtime</scope>
 	</dependency>
 	<dependency>
