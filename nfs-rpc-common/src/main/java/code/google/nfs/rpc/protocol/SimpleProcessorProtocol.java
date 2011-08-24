@@ -16,7 +16,7 @@ import code.google.nfs.rpc.ResponseWrapper;
  * Simple Processor Protocol
  * 	VERSION(1B):   
  *  TYPE(1B):      request/response 
- *  DATATYPE(1B):  serialize/deserialize type
+ *  CODECTYPE(1B):  serialize/deserialize type
  *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  KEEPED(1B):    
@@ -49,12 +49,12 @@ public class SimpleProcessorProtocol implements Protocol{
 		byte type = REQUEST;
 		byte[] body = null;
 		int timeout = 0;
-		int dataType = 0;
+		Integer codecType = 0;
 		if(message instanceof RequestWrapper){
 			try{
 				RequestWrapper wrapper = (RequestWrapper) message;
-				dataType = wrapper.getCodecType();
-				body = Codecs.getEncoder(dataType).encode(wrapper.getMessage()); 
+				codecType = wrapper.getCodecType();
+				body = Codecs.getEncoder(codecType).encode(wrapper.getMessage()); 
 				id = wrapper.getId();
 				timeout = wrapper.getTimeout();
 			}
@@ -66,8 +66,8 @@ public class SimpleProcessorProtocol implements Protocol{
 		else{
 			ResponseWrapper wrapper = (ResponseWrapper) message;
 			try{
-				dataType = wrapper.getCodecType();
-				body = Codecs.getEncoder(dataType).encode(wrapper.getResponse()); 
+				codecType = wrapper.getCodecType();
+				body = Codecs.getEncoder(codecType).encode(wrapper.getResponse()); 
 				id = wrapper.getRequestId();
 			}
 			catch(Exception e){
@@ -82,7 +82,7 @@ public class SimpleProcessorProtocol implements Protocol{
 		ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 		byteBuffer.writeByte(VERSION);
 		byteBuffer.writeByte(type);
-		byteBuffer.writeByte((byte)dataType);
+		byteBuffer.writeByte((byte)codecType.intValue());
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);
@@ -104,7 +104,7 @@ public class SimpleProcessorProtocol implements Protocol{
         byte version = wrapper.readByte();
         if(version == (byte)1){
         	byte type = wrapper.readByte();
-        	int dataType = wrapper.readByte();
+        	int codecType = wrapper.readByte();
     		wrapper.readByte();
     		wrapper.readByte();
     		wrapper.readByte();
@@ -120,14 +120,14 @@ public class SimpleProcessorProtocol implements Protocol{
     		byte[] body = new byte[expectedLen];
     		wrapper.readBytes(body);
         	if(type == REQUEST){
-        		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId,dataType);
+        		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId,codecType);
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
         		ResponseWrapper responseWrapper = new ResponseWrapper();
             	responseWrapper.setRequestId(requestId);
             	responseWrapper.setResponse(body);
-            	responseWrapper.setCodecType(dataType);
+            	responseWrapper.setCodecType(codecType);
 	        	return responseWrapper;
         	}
         	else{
