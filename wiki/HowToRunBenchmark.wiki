@@ -1,0 +1,29 @@
+= Server =
+
+  * u need change servercommon.sh,to set listenPort,maxThreads & responseSize;
+  * then u just need to execute minarpc.sh | nettyrpc.sh | minasimple.sh |  nettysimple.sh;
+
+= Client =
+
+  * u need change clientcommon.sh,to set [serverip] [serverport] [concurrents] [timeout] [datatype] [requestsize] [runtime] [clientnums];
+  * then u just need to execute minarpc.sh | nettyrpc.sh | minasimple.sh |  nettysimple.sh;
+  * when benchmark finished,it'll print results to logs(minarpc.sh --> benchmark.log.mina.rpc etc.),just like belows:
+  {{{
+    ----------Benchmark Statistics--------------
+    Concurrents: 100
+    Runtime: 120 seconds
+    Benchmark Time: 50
+    Requests: 4515447 Success: 100% (4515447) Error: 0% (0)
+    Avg TPS: 75142 Max TPS: 77465 Min TPS: 71786
+    Avg RT: 1ms
+    RT <= 0: 0% 10509/4515447
+    RT (0,1]: 69% 3155532/4515447
+    RT (1,5]: 29% 1336741/4515447
+    RT (5,10]: 0% 7155/4515447
+    RT (10,50]: 0% 5510/4515447
+    RT (50,100]: 0% 0/4515447
+    RT (100,500]: 0% 0/4515447
+    RT (500,1000]: 0% 0/4515447
+    RT > 1000: 0% 0/4515447
+  }}}
+
