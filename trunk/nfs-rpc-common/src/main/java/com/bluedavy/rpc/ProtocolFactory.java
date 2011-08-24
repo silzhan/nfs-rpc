@@ -32,6 +32,11 @@ public class ProtocolFactory {
 		}
 	}
 	
+	public static void setProtocol(Protocol customProtocol,ServerHandler customServerHandler){
+		protocol = customProtocol;
+		serverHandler = customServerHandler;
+	}
+	
 	public static Protocol getProtocol(){
 		return protocol;
 	}
