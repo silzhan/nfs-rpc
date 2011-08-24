@@ -1,11 +1,18 @@
 package code.google.nfs.rpc.netty.server;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -18,9 +25,15 @@ import code.google.nfs.rpc.netty.serialize.NettyProtocolDecoder;
 import code.google.nfs.rpc.netty.serialize.NettyProtocolEncoder;
 import code.google.nfs.rpc.server.Server;
 
-
+/**
+ * Netty Server
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class NettyServer implements Server {
 
+	private static final Log LOGGER = LogFactory.getLog(NettyServer.class);
+	
 	private ServerBootstrap bootstrap = null;
 
 	private AtomicBoolean startFlag = new AtomicBoolean(false);
@@ -47,7 +60,7 @@ public class NettyServer implements Server {
 			}
 		});
 		bootstrap.bind(new InetSocketAddress(listenPort));
-		System.out.println("Server started,listen at: "+listenPort);
+		LOGGER.warn("Server started,listen at: "+listenPort);
 	}
 
 	public void registerProcessor(String serviceName, Object serviceInstance) {
@@ -55,6 +68,7 @@ public class NettyServer implements Server {
 	}
 	
 	public void stop() throws Exception {
+		LOGGER.warn("Server stop!");
 		bootstrap.releaseExternalResources();
 		startFlag.set(false);
 	}

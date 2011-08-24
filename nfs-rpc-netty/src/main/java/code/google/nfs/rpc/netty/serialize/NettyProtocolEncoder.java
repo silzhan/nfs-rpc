@@ -1,12 +1,19 @@
 package code.google.nfs.rpc.netty.serialize;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.handler.codec.oneone.OneToOneEncoder;
 
 import code.google.nfs.rpc.ProtocolFactory;
 /**
- * encode message to byte
+ * Encode Message
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
 public class NettyProtocolEncoder extends OneToOneEncoder {
 	

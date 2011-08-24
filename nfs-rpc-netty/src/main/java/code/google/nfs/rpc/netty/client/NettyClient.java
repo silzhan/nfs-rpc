@@ -1,14 +1,23 @@
 package code.google.nfs.rpc.netty.client;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import java.net.InetSocketAddress;
 
 import org.jboss.netty.channel.ChannelFuture;
 
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.client.AbstractClient;
-
+/**
+ * Netty Client
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class NettyClient extends AbstractClient {
-
+	
 	private ChannelFuture cf;
 	
 	private String key;
@@ -17,13 +26,14 @@ public class NettyClient extends AbstractClient {
 	
 	public NettyClient(ChannelFuture cf,String key,int connectTimeout){
 		this.cf = cf;
+		this.key = key;
 		this.connectTimeout = connectTimeout;
 	}
 	
 	public void sendRequest(RequestWrapper wrapper, int timeout) throws Exception {
 		ChannelFuture writeFuture = cf.getChannel().write(wrapper);
+		// wait until success or timeout
 		writeFuture.awaitUninterruptibly(timeout);
-		// 确保写入os sendBuffer了
 		if(!writeFuture.isDone()){
 			throw new Exception("Send request to "+cf.getChannel().toString()+" timeout("+timeout+"ms)");
 		}
@@ -32,6 +42,7 @@ public class NettyClient extends AbstractClient {
 		}
 		if(!writeFuture.isSuccess()){
 			if(cf.getChannel().isConnected()){
+				// maybe some exception,so close the channel
 				cf.getChannel().close();
 			}
 			else{

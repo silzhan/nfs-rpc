@@ -1,10 +1,19 @@
 package code.google.nfs.rpc.netty.serialize;
-
+/**
+ * nfs-rpc
+ *   Apache License
+ *   
+ *   http://code.google.com/p/nfs-rpc (c) 2011
+ */
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
 import code.google.nfs.rpc.protocol.ByteBufferWrapper;
-
+/**
+ * Implements ByteBufferWrapper based on Netty ChannelBuffer
+ * 
+ * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
+ */
 public class NettyByteBufferWrapper implements ByteBufferWrapper {
 
 	private ChannelBuffer buffer;
