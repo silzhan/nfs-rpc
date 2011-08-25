@@ -6,6 +6,7 @@ package code.google.nfs.rpc.mina.client;
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,8 +20,6 @@ import code.google.nfs.rpc.ResponseWrapper;
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
 public class MinaClientProcessor extends IoHandlerAdapter {
-
-//	private static final int MIN_RESPONSES = 60;
 	
 	private static final Log LOGGER = LogFactory.getLog(MinaClientProcessor.class);
 	
@@ -32,12 +31,6 @@ public class MinaClientProcessor extends IoHandlerAdapter {
 	
 	private String key=null;
 	
-//	private int receiveResponseIndex = 0;
-//	
-//	private long checkTime = 0;
-//	
-//	private List<ResponseWrapper> responses = new ArrayList<ResponseWrapper>();
-	
 	public MinaClientProcessor(MinaClientFactory factory,String key){
 		this.factory = factory;
 		this.key = key;
@@ -48,16 +41,16 @@ public class MinaClientProcessor extends IoHandlerAdapter {
 	}
 	
 	public void messageReceived(IoSession session, Object message) throws Exception {
-		if(!(message instanceof ResponseWrapper)){
-			LOGGER.error("receive message error,only support ResponseWrapper");
-			throw new Exception("receive message error,only support ResponseWrapper");
-		}
-		ResponseWrapper response = (ResponseWrapper)message;
-		if(isDebugEnabled){
+//		if(!(message instanceof ResponseWrapper)){
+//			LOGGER.error("receive message error,only support ResponseWrapper");
+//			throw new Exception("receive message error,only support ResponseWrapper");
+//		}
+		List<ResponseWrapper> response = (List<ResponseWrapper>)message;
+//		if(isDebugEnabled){
 			// for performance trace
-			LOGGER.debug("receive response from server: "+session.getRemoteAddress()+", request id is:"+response.getRequestId());
-		}
-		client.putResponse(response);
+//			LOGGER.debug("receive response from server: "+session.getRemoteAddress()+", request id is:"+response.getRequestId());
+//		}
+		client.putResponses(response);
 //		responses.add(response);
 //		receiveResponseIndex ++;
 //		if(receiveResponseIndex > MIN_RESPONSES || System.nanoTime() - checkTime >= 1000000){
