@@ -18,14 +18,14 @@ import code.google.nfs.rpc.client.ClientFactory;
  */
 public abstract class AbstractSimpleProcessorBenchmarkClient extends AbstractBenchmarkClient{
 	
-	public Runnable getRunnable(String targetIP, int targetPort,
+	public ClientRunnable getClientRunnable(String targetIP, int targetPort,
 			int clientNums, int rpcTimeout, int dataType, int requestSize,
-			CyclicBarrier barrier, CountDownLatch latch, long endTime) {
+			CyclicBarrier barrier, CountDownLatch latch, long endTime ,long startTime) {
 		ProtocolFactory.setProtocol(TYPE.SIMPLE);
 		return new SimpleProcessorBenchmarkClientRunnable(
 				getClientFactory(), targetIP, targetPort,
 				clientNums, rpcTimeout, dataType, requestSize, barrier, latch,
-				endTime);
+				startTime, endTime);
 	}
 
 	public abstract ClientFactory getClientFactory();

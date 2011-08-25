@@ -6,6 +6,7 @@ package code.google.nfs.rpc.client;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -134,7 +135,30 @@ public abstract class AbstractClient implements Client {
 	 * receive response
 	 */
 	public void putResponse(ResponseWrapper wrapper) throws Exception {
-//		for (ResponseWrapper wrapper : responseWrappers) {
+		if (!responses.containsKey(wrapper.getRequestId())) {
+			LOGGER.warn("give up the response,request id is:" + wrapper.getRequestId() + ",maybe because timeout!");
+			return;
+		}
+		try {
+			ArrayBlockingQueue<ResponseWrapper> queue = responses.get(wrapper.getRequestId());
+			if (queue != null) {
+				queue.put(wrapper);
+			} 
+			else {
+				LOGGER.warn("give up the response,request id is:"
+						+ wrapper.getRequestId() + ",because queue is null");
+			}
+		} 
+		catch (InterruptedException e) {
+			LOGGER.error("put response error,request id is:" + wrapper.getRequestId(), e);
+		}
+	}
+	
+	/**
+	 * receive responses
+	 */
+	public void putResponses(List<ResponseWrapper> wrappers) throws Exception {
+		for (ResponseWrapper wrapper : wrappers) {
 			if (!responses.containsKey(wrapper.getRequestId())) {
 				LOGGER.warn("give up the response,request id is:" + wrapper.getRequestId() + ",maybe because timeout!");
 				return;
@@ -152,7 +176,7 @@ public abstract class AbstractClient implements Client {
 			catch (InterruptedException e) {
 				LOGGER.error("put response error,request id is:" + wrapper.getRequestId(), e);
 			}
-//		}
+		}
 		// TODO: pipeline
 	}
 
