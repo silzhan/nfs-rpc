@@ -6,6 +6,8 @@
  */
 package code.google.nfs.rpc.client;
 
+import java.util.List;
+
 import code.google.nfs.rpc.ResponseWrapper;
 
 /**
@@ -54,6 +56,11 @@ public interface Client {
 	 * receive response from server
 	 */
 	public void putResponse(ResponseWrapper response) throws Exception;
+	
+	/**
+	 * receive responses from server
+	 */
+	public void putResponses(List<ResponseWrapper> responses) throws Exception;
 	
 	/**
 	 * server address

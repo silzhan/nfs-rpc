@@ -5,12 +5,10 @@ package code.google.nfs.rpc.benchmark;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,13 +17,9 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
-public class RPCBenchmarkClientRunnable implements Runnable {
+public class RPCBenchmarkClientRunnable implements ClientRunnable {
 
 	private static final Log LOGGER = LogFactory.getLog(RPCBenchmarkClientRunnable.class);
-	
-	private static final AtomicInteger fileNameIndex = new AtomicInteger();
-	
-	private static final AtomicInteger errorFileNameIndex = new AtomicInteger();
 	
 	private int requestSize;
 
@@ -37,27 +31,48 @@ public class RPCBenchmarkClientRunnable implements Runnable {
 
 	private boolean running = true;
 	
-	private BufferedWriter writer;
-	
-	private BufferedWriter errorWriter;
-	
 	private BenchmarkTestService testService;
 	
+	// response time spread
+	private long[] responseSpreads = new long[9];
+	
+	// error request per second
+	private long[] errorTPS = null;
+	
+	// error response times per second
+	private long[] errorResponseTimes = null;
+	
+	// tps per second
+	private long[] tps = null;
+	
+	// response times per second
+	private long[] responseTimes = null;
+	
+	// benchmark startTime
+	private long startTime;
+	
+	// benchmark maxRange
+	private int maxRange;
+	
 	public RPCBenchmarkClientRunnable(BenchmarkTestService testService, int requestSize, CyclicBarrier barrier,
-			CountDownLatch latch, long endTime) {
+			CountDownLatch latch, long startTime, long endTime) {
 		this.testService = testService;
 		this.requestSize = requestSize;
 		this.barrier = barrier;
 		this.latch = latch;
+		this.startTime = startTime;
 		this.endTime = endTime;
-		File file = new File("benchmark.results." + fileNameIndex.incrementAndGet());
-		File errorFile = new File("benchmark.error.results." + errorFileNameIndex.incrementAndGet());
-		try{
-			this.writer = new BufferedWriter(new FileWriter(file));
-			this.errorWriter = new BufferedWriter(new FileWriter(errorFile));
-		}
-		catch(Exception e){
-			// IGNORE
+		maxRange = (Integer.parseInt(String.valueOf((endTime - startTime))) / 1000) + 1;
+		errorTPS = new long[maxRange];
+		errorResponseTimes = new long[maxRange];
+		tps = new long[maxRange];
+		responseTimes = new long[maxRange];
+		// init
+		for (int i = 0; i < maxRange; i++) {
+			errorTPS[i] = 0;
+			errorResponseTimes[i] = 0;
+			tps[i] = 0;
+			responseTimes[i] = 0;
 		}
 	}
 
@@ -70,36 +85,90 @@ public class RPCBenchmarkClientRunnable implements Runnable {
 		}
 		while (running) {
 			long beginTime = System.currentTimeMillis();
+			if (beginTime >= endTime) {
+				running = false;
+				break;
+			}
 			try {
 				ResponseObject response = testService.execute(new RequestObject(requestSize));
+				long currentTime = System.currentTimeMillis();
+				if(currentTime <= startTime){
+					continue;
+				}
+				long consumeTime = currentTime - beginTime;
+				sumResponseTimeSpread(consumeTime);
+				int range = Integer.parseInt(String.valueOf(currentTime - startTime))/1000;
+				if(range >= maxRange){
+					System.err.println("benchmark range exceeds maxRange,range is: "+range+",maxRange is: "+maxRange);
+					continue;
+				}
 				if(response.getBytes() !=null ){
-					writer.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
+					tps[range] = tps[range] + 1;
+					responseTimes[range] = responseTimes[range] + consumeTime;
 				}
 				else{
 					LOGGER.error("server return response is null");
-					errorWriter.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
+					errorTPS[range] = errorTPS[range] + 1;
+					errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
 				}
-			} catch (Exception e) {
+			} 
+			catch (Exception e) {
 				LOGGER.error("testService.execute error",e);
-				try{
-					errorWriter.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
+				long currentTime = System.currentTimeMillis();
+				if(currentTime <= startTime){
+					continue;
 				}
-				catch(Exception t){
-					// IGNORE
+				long consumeTime = currentTime - beginTime;
+				sumResponseTimeSpread(consumeTime);
+				int range = Integer.parseInt(String.valueOf(currentTime - startTime))/1000;	
+				if(range >= maxRange){
+					System.err.println("benchmark range exceeds maxRange,range is: "+range+",maxRange is: "+maxRange);
+					continue;
 				}
-			}
-			if (System.currentTimeMillis() >= endTime) {
-				running = false;
+				errorTPS[range] = errorTPS[range] + 1;
+				errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
 			}
 		}
-		try {
-			writer.close();
-			errorWriter.close();
-		} catch (Exception e) {
-			// IGNORE
+		latch.countDown();
+	}
+	
+	public List<long[]> getResults() {
+		List<long[]> results = new ArrayList<long[]>();
+		results.add(responseSpreads);
+		results.add(tps);
+		results.add(responseTimes);
+		results.add(errorTPS);
+		results.add(errorResponseTimes);
+		return results;
+	}
+	
+	private void sumResponseTimeSpread(long responseTime) {
+		if (responseTime <= 0) {
+			responseSpreads[0] = responseSpreads[0] + 1;
+		} 
+		else if (responseTime > 0 && responseTime <= 1) {
+			responseSpreads[1] = responseSpreads[1] + 1;
 		}
-		finally{
-			latch.countDown();
+		else if (responseTime > 1 && responseTime <= 5) {
+			responseSpreads[2] = responseSpreads[2] + 1;
+		} 
+		else if (responseTime > 5 && responseTime <= 10) {
+			responseSpreads[3] = responseSpreads[3] + 1;
+		} 
+		else if (responseTime > 10 && responseTime <= 50) {
+			responseSpreads[4] = responseSpreads[4] + 1;
+		} 
+		else if (responseTime > 50 && responseTime <= 100) {
+			responseSpreads[5] = responseSpreads[5] + 1;
+		} 
+		else if (responseTime > 100 && responseTime <= 500) {
+			responseSpreads[6] = responseSpreads[6] + 1;
+		} 
+		else if (responseTime > 500 && responseTime <= 1000) {
+			responseSpreads[7] = responseSpreads[7] + 1;
+		} 
+		else if (responseTime > 1000) {
+			responseSpreads[8] = responseSpreads[8] + 1;
 		}
 	}
 

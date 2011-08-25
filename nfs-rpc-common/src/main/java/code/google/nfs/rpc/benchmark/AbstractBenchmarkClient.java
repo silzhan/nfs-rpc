@@ -5,16 +5,14 @@ package code.google.nfs.rpc.benchmark;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
@@ -113,98 +111,64 @@ public abstract class AbstractBenchmarkClient {
 
 		CyclicBarrier barrier = new CyclicBarrier(concurrents);
 		CountDownLatch latch = new CountDownLatch(concurrents);
+		List<ClientRunnable> runnables = new ArrayList<ClientRunnable>();
+		// benchmark start after thirty seconds,let java app warm up
+		long benchmarkBeginTime = System.currentTimeMillis() + 30000;
 		for (int i = 0; i < concurrents; i++) {
-			Thread thread = new Thread(getRunnable(serverIP, serverPort,
+			ClientRunnable runnable = getClientRunnable(serverIP, serverPort,
 					clientNums, timeout, codectype, requestSize, barrier, latch,
-					endtime), "benchmarkclient-" + i);
+					endtime, benchmarkBeginTime);
+			runnables.add(runnable);
+			Thread thread = new Thread(runnable, "benchmarkclient-" + i);
 			thread.start();
 		}
 
-		// benchmark start after one minute,let java app warm up
-		long benchmarkBeginTime = System.currentTimeMillis() + 60000;
 		latch.await();
 
-		// read result files, & add all
+		// read results & add all
 		// key: runtime second range value: Long[2] array Long[0]: execute count Long[1]: response time sum
+		int maxTimeRange = runtime;
 		Map<String, Long[]> times = new HashMap<String, Long[]>();
-		File path = new File(".");
-		File[] resultFiles = path.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				if (name.startsWith("benchmark.results.")) {
-					return true;
-				}
-				return false;
-			}
-		});
-		long maxTimeRange = 0;
-		for (File resultFile : resultFiles) {
-			BufferedReader reader = new BufferedReader(new FileReader(
-					resultFile));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				String[] info = line.split(",");
-				long recordTime = Long.parseLong(info[0]);
-				long responseTime = Long.parseLong(info[1]);
-				if (recordTime - benchmarkBeginTime < 0)
-					continue;
-				long tmpTimeRange = (recordTime - benchmarkBeginTime) / 1000;
-				if (tmpTimeRange > maxTimeRange) {
-					maxTimeRange = tmpTimeRange;
-				}
-				String timeRange = String.valueOf(tmpTimeRange);
-				sumResponseTimeSpread(responseTime);
-				if (times.containsKey(timeRange)) {
-					Long[] values = times.get(timeRange);
-					values[0] += 1;
-					values[1] += responseTime;
-					times.put(timeRange, values);
-				} else {
-					Long[] values = new Long[2];
-					values[0] = 1l;
-					values[1] = responseTime;
-					times.put(timeRange, values);
-				}
-			}
-			reader.close();
-			resultFile.delete();
-		}
-
 		Map<String, Long[]> errorTimes = new HashMap<String, Long[]>();
-		File[] resultErrorFiles = path.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				if (name.startsWith("benchmark.error.results.")) {
-					return true;
+		for (ClientRunnable runnable : runnables) {
+			List<long[]> results = runnable.getResults();
+			long[] responseSpreads = results.get(0);
+			below0sum += responseSpreads[0];
+			above0sum += responseSpreads[1];
+			above1sum += responseSpreads[2];
+			above5sum += responseSpreads[3];
+			above10sum += responseSpreads[4];
+			above50sum += responseSpreads[5];
+			above100sum += responseSpreads[6];
+			above500sum += responseSpreads[7];
+			above1000sum += responseSpreads[8];
+			long[] tps = results.get(1);
+			long[] responseTimes = results.get(2);
+			long[] errorTPS = results.get(3);
+			long[] errorResponseTimes = results.get(4);
+			for (int i = 0; i < tps.length; i++) {
+				String key = String.valueOf(i);
+				if(times.containsKey(key)){
+					Long[] successInfos = times.get(key);
+					Long[] errorInfos = errorTimes.get(key);
+					successInfos[0] += tps[i];
+					successInfos[1] += responseTimes[i];
+					errorInfos[0] += errorTPS[i];
+					errorInfos[1] += errorResponseTimes[i];
+					times.put(key, successInfos);
+					errorTimes.put(key, errorInfos);
 				}
-				return false;
-			}
-		});
-		for (File resultErrorFile : resultErrorFiles) {
-			BufferedReader reader = new BufferedReader(new FileReader(
-					resultErrorFile));
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				String[] info = line.split(",");
-				long recordTime = Long.parseLong(info[0]);
-				long responseTime = Long.parseLong(info[1]);
-				if (recordTime - benchmarkBeginTime < 0)
-					continue;
-				long tmpTimeRange = (recordTime - benchmarkBeginTime) / 1000;
-				String timeRange = String.valueOf(tmpTimeRange);
-				sumResponseTimeSpread(responseTime);
-				if (errorTimes.containsKey(timeRange)) {
-					Long[] values = errorTimes.get(timeRange);
-					values[0] += 1;
-					values[1] += responseTime;
-					errorTimes.put(timeRange, values);
-				} else {
-					Long[] values = new Long[2];
-					values[0] = 1l;
-					values[1] = responseTime;
-					errorTimes.put(timeRange, values);
+				else{
+					Long[] successInfos = new Long[2];
+					successInfos[0] = tps[i];
+					successInfos[1] = responseTimes[i];
+					Long[] errorInfos = new Long[2];
+					errorInfos[0] = errorTPS[i];
+					errorInfos[1] = errorResponseTimes[i];
+					times.put(key, successInfos);
+					errorTimes.put(key, errorInfos);
 				}
 			}
-			reader.close();
-			resultErrorFile.delete();
 		}
 
 		long ignoreRequest = 0;
@@ -294,30 +258,8 @@ public abstract class AbstractBenchmarkClient {
 		System.exit(0);
 	}
 
-	private void sumResponseTimeSpread(long responseTime) {
-		if (responseTime <= 0) {
-			below0sum++;
-		} else if (responseTime > 0 && responseTime <= 1) {
-			above0sum++;
-		} else if (responseTime > 1 && responseTime <= 5) {
-			above1sum++;
-		} else if (responseTime > 5 && responseTime <= 10) {
-			above5sum++;
-		} else if (responseTime > 10 && responseTime <= 50) {
-			above10sum++;
-		} else if (responseTime > 50 && responseTime <= 100) {
-			above50sum++;
-		} else if (responseTime > 100 && responseTime <= 500) {
-			above100sum++;
-		} else if (responseTime > 500 && responseTime <= 1000) {
-			above500sum++;
-		} else if (responseTime > 1000) {
-			above1000sum++;
-		}
-	}
-
-	public abstract Runnable getRunnable(String targetIP, int targetPort,
+	public abstract ClientRunnable getClientRunnable(String targetIP, int targetPort,
 			int clientNums, int rpcTimeout, int codecType, int requestSize,
-			CyclicBarrier barrier, CountDownLatch latch, long endTime);
+			CyclicBarrier barrier, CountDownLatch latch, long endTime, long startTime);
 
 }
