@@ -69,20 +69,20 @@ public class RPCBenchmarkClientRunnable implements Runnable {
 			// IGNORE
 		}
 		while (running) {
-			long beginTime = System.nanoTime();
+			long beginTime = System.currentTimeMillis();
 			try {
 				ResponseObject response = testService.execute(new RequestObject(requestSize));
 				if(response.getBytes() !=null ){
-					writer.write(System.currentTimeMillis()+","+((System.nanoTime() - beginTime)/1000000)+"\r\n");
+					writer.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
 				}
 				else{
 					LOGGER.error("server return response is null");
-					errorWriter.write(System.currentTimeMillis()+","+((System.nanoTime() - beginTime)/1000000)+"\r\n");
+					errorWriter.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
 				}
 			} catch (Exception e) {
 				LOGGER.error("testService.execute error",e);
 				try{
-					errorWriter.write(System.currentTimeMillis()+","+((System.nanoTime() - beginTime)/1000000)+"\r\n");
+					errorWriter.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
 				}
 				catch(Exception t){
 					// IGNORE
