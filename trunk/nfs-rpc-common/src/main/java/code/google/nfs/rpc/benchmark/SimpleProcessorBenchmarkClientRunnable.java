@@ -87,22 +87,22 @@ public class SimpleProcessorBenchmarkClientRunnable implements Runnable {
 			// IGNORE
 		}
 		while (running) {
-			long beginTime = System.currentTimeMillis();
+			long beginTime = System.nanoTime();
 			try {
 				ResponseObject response = (ResponseObject) factory.get(
 						targetIP, targetPort, 1000, clientNums).invokeSync(
 						new RequestObject(requestSize), rpcTimeout, dataType);
 				if (response.getBytes() != null) {
 					writer.write(System.currentTimeMillis() + ","
-							+ (System.currentTimeMillis() - beginTime) + "\r\n");
+							+ (System.nanoTime() - beginTime)/100000 + "\r\n");
 				} else {
 					LOGGER.error("server return response is null");
-					errorWriter.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
+					errorWriter.write(System.currentTimeMillis()+","+(System.nanoTime() - beginTime)/1000000 + "\r\n");
 				}
 			} catch (Exception e) {
 				LOGGER.error("client.invokeSync error",e);
 				try{
-					errorWriter.write(System.currentTimeMillis()+","+(System.currentTimeMillis() - beginTime)+"\r\n");
+					errorWriter.write(System.currentTimeMillis()+","+(System.nanoTime() - beginTime)/1000000 + "\r\n");
 				}
 				catch(Exception t){
 					// IGNORE
