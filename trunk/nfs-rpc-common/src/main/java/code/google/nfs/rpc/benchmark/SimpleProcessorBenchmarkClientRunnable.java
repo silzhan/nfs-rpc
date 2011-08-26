@@ -112,12 +112,12 @@ public class SimpleProcessorBenchmarkClientRunnable implements ClientRunnable {
 						targetIP, targetPort, 1000, clientNums).invokeSync(
 						new RequestObject(requestSize), rpcTimeout, codecType);
 				long currentTime = System.currentTimeMillis();
-				if(currentTime <= startTime){
+				if(beginTime <= startTime){
 					continue;
 				}
 				long consumeTime = currentTime - beginTime;
 				sumResponseTimeSpread(consumeTime);
-				int range = Integer.parseInt(String.valueOf(currentTime - startTime))/1000;
+				int range = Integer.parseInt(String.valueOf(beginTime - startTime))/1000;
 				if(range >= maxRange){
 					System.err.println("benchmark range exceeds maxRange,range is: "+range+",maxRange is: "+maxRange);
 					continue;
@@ -135,12 +135,12 @@ public class SimpleProcessorBenchmarkClientRunnable implements ClientRunnable {
 			catch (Exception e) {
 				LOGGER.error("client.invokeSync error",e);
 				long currentTime = System.currentTimeMillis();
-				if(currentTime <= startTime){
+				if(beginTime <= startTime){
 					continue;
 				}
 				long consumeTime = currentTime - beginTime;
 				sumResponseTimeSpread(consumeTime);
-				int range = Integer.parseInt(String.valueOf(currentTime - startTime))/1000;	
+				int range = Integer.parseInt(String.valueOf(beginTime - startTime))/1000;	
 				if(range >= maxRange){
 					System.err.println("benchmark range exceeds maxRange,range is: "+range+",maxRange is: "+maxRange);
 					continue;
