@@ -92,14 +92,14 @@ public class RPCBenchmarkClientRunnable implements ClientRunnable {
 			try {
 				ResponseObject response = testService.execute(new RequestObject(requestSize));
 				long currentTime = System.currentTimeMillis();
-				if(currentTime <= startTime){
+				if(beginTime <= startTime){
 					continue;
 				}
 				long consumeTime = currentTime - beginTime;
 				sumResponseTimeSpread(consumeTime);
-				int range = Integer.parseInt(String.valueOf(currentTime - startTime))/1000;
+				int range = Integer.parseInt(String.valueOf(beginTime - startTime))/1000;
 				if(range >= maxRange){
-					System.err.println("benchmark range exceeds maxRange,range is: "+range+",maxRange is: "+maxRange);
+					// IGNORE
 					continue;
 				}
 				if(response.getBytes() !=null ){
@@ -115,14 +115,14 @@ public class RPCBenchmarkClientRunnable implements ClientRunnable {
 			catch (Exception e) {
 				LOGGER.error("testService.execute error",e);
 				long currentTime = System.currentTimeMillis();
-				if(currentTime <= startTime){
+				if(beginTime <= startTime){
 					continue;
 				}
 				long consumeTime = currentTime - beginTime;
 				sumResponseTimeSpread(consumeTime);
-				int range = Integer.parseInt(String.valueOf(currentTime - startTime))/1000;	
+				int range = Integer.parseInt(String.valueOf(beginTime - startTime))/1000;	
 				if(range >= maxRange){
-					System.err.println("benchmark range exceeds maxRange,range is: "+range+",maxRange is: "+maxRange);
+					// IGNORE
 					continue;
 				}
 				errorTPS[range] = errorTPS[range] + 1;
