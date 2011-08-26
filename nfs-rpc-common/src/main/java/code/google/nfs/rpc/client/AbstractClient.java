@@ -34,8 +34,8 @@ public abstract class AbstractClient implements Client {
 	private static final long PRINT_CONSUME_MINTIME = Long.parseLong(System
 			.getProperty("nfs.rpc.print.consumetime", "0"));
 
-	protected static ConcurrentHashMap<Integer, ArrayBlockingQueue<ResponseWrapper>> responses = 
-			new ConcurrentHashMap<Integer, ArrayBlockingQueue<ResponseWrapper>>();
+	protected static ConcurrentHashMap<Integer, ArrayBlockingQueue<Object>> responses = 
+			new ConcurrentHashMap<Integer, ArrayBlockingQueue<Object>>();
 
 	public Object invokeSync(Object message, int timeout, int dataType)
 			throws Exception {
@@ -53,7 +53,7 @@ public abstract class AbstractClient implements Client {
 
 	private Object invokeSyncIntern(RequestWrapper wrapper) throws Exception {
 		long beginTime = System.currentTimeMillis();
-		ArrayBlockingQueue<ResponseWrapper> responseQueue = new ArrayBlockingQueue<ResponseWrapper>(1);
+		ArrayBlockingQueue<Object> responseQueue = new ArrayBlockingQueue<Object>(1);
 		responses.put(wrapper.getId(), responseQueue);
 		ResponseWrapper responseWrapper = null;
 		try {
@@ -73,8 +73,9 @@ public abstract class AbstractClient implements Client {
 			LOGGER.error("send request to os sendbuffer error", e);
 			throw e;
 		}
+		Object result = null;
 		try {
-			responseWrapper = responseQueue.poll(
+			result = responseQueue.poll(
 					wrapper.getTimeout() - (System.currentTimeMillis() - beginTime),
 					TimeUnit.MILLISECONDS);
 		}
@@ -94,7 +95,7 @@ public abstract class AbstractClient implements Client {
 						+ wrapper.getId());
 			}
 		}
-		if (responseWrapper == null) {
+		if (result == null) {
 			String errorMsg = "receive response timeout("
 					+ wrapper.getTimeout() + " ms),server is: "
 					+ getServerIP() + ":" + getServerPort()
@@ -102,6 +103,24 @@ public abstract class AbstractClient implements Client {
 			throw new Exception(errorMsg);
 		}
 		
+		if(result instanceof ResponseWrapper){
+			responseWrapper = (ResponseWrapper) result;
+		}
+		else if(result instanceof List){
+			@SuppressWarnings("unchecked")
+			List<ResponseWrapper> responseWrappers = (List<ResponseWrapper>) result;
+			for (ResponseWrapper response : responseWrappers) {
+				if(response.getRequestId() == wrapper.getId()){
+					responseWrapper = response;
+				}
+				else{
+					putResponse(response);
+				}
+			}
+		}
+		else{
+			throw new Exception("only receive ResponseWrapper or List as response");
+		}
 		try{
 			// do deserialize in business threadpool
 			if (responseWrapper.getResponse() instanceof byte[]) {
@@ -140,7 +159,7 @@ public abstract class AbstractClient implements Client {
 			return;
 		}
 		try {
-			ArrayBlockingQueue<ResponseWrapper> queue = responses.get(wrapper.getRequestId());
+			ArrayBlockingQueue<Object> queue = responses.get(wrapper.getRequestId());
 			if (queue != null) {
 				queue.put(wrapper);
 			} 
@@ -161,12 +180,13 @@ public abstract class AbstractClient implements Client {
 		for (ResponseWrapper wrapper : wrappers) {
 			if (!responses.containsKey(wrapper.getRequestId())) {
 				LOGGER.warn("give up the response,request id is:" + wrapper.getRequestId() + ",maybe because timeout!");
-				return;
+				continue;
 			}
 			try {
-				ArrayBlockingQueue<ResponseWrapper> queue = responses.get(wrapper.getRequestId());
+				ArrayBlockingQueue<Object> queue = responses.get(wrapper.getRequestId());
 				if (queue != null) {
-					queue.put(wrapper);
+					queue.put(wrappers);
+					break;
 				} 
 				else {
 					LOGGER.warn("give up the response,request id is:"
@@ -177,7 +197,6 @@ public abstract class AbstractClient implements Client {
 				LOGGER.error("put response error,request id is:" + wrapper.getRequestId(), e);
 			}
 		}
-		// TODO: pipeline
 	}
 
 	/**
