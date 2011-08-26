@@ -6,6 +6,7 @@ package code.google.nfs.rpc.netty.client;
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,12 +53,13 @@ public class NettyClientHandler extends SimpleChannelUpstreamHandler {
 	
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
-		ResponseWrapper response = (ResponseWrapper)e.getMessage();
-		if(isDebugEnabled){
+		@SuppressWarnings("unchecked")
+		List<ResponseWrapper> responses = (List<ResponseWrapper>)e.getMessage();
+//		if(isDebugEnabled){
 			// for performance trace
-			LOGGER.debug("receive response from server: "+ctx.getChannel().getRemoteAddress()+",request id is:"+response.getRequestId());
-		}
-		client.putResponse(response);
+//			LOGGER.debug("receive response from server: "+ctx.getChannel().getRemoteAddress()+",request id is:"+response.getRequestId());
+//		}
+		client.putResponses(responses);
 //		responses.add(response);
 //		receiveResponseIndex ++;
 //		if(receiveResponseIndex > MIN_RESPONSES || System.nanoTime() - checkTime >= 1000000){
