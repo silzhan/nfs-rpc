@@ -54,12 +54,9 @@ public class MinaClient extends AbstractClient {
 						+ " error,maybe because sendbuffer is full or connection closed: "
 						+ !session.isConnected();
 				LOGGER.error(error);
-				ResponseWrapper response = new ResponseWrapper();
-				response.setRequestId(wrapper.getId());
+				ResponseWrapper response = new ResponseWrapper(wrapper.getId(),wrapper.getCodecType(),wrapper.getProtocolType());
 				response.setException(new Exception(error));
 				try {
-//					List<ResponseWrapper> wrappers = new ArrayList<ResponseWrapper>();
-//					wrappers.add(response);
 					putResponse(response);
 				} 
 				catch (Exception e) {

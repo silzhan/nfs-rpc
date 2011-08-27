@@ -62,8 +62,8 @@ public class MinaServer implements Server {
         }
 	}
 	
-	public void registerProcessor(String serviceName,Object serviceInstance){
-		ProtocolFactory.getServerHandler().registerProcessor(serviceName, serviceInstance);
+	public void registerProcessor(Integer protocolType,String serviceName,Object serviceInstance){
+		ProtocolFactory.getServerHandler(protocolType).registerProcessor(serviceName, serviceInstance);
 	}
 
 	public void stop() throws Exception {

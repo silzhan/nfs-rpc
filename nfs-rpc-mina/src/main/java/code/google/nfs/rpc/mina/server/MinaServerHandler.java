@@ -49,58 +49,67 @@ public class MinaServerHandler extends IoHandlerAdapter {
 
 	public void messageReceived(final IoSession session, final Object message)
 			throws Exception {
-//		if (!(message instanceof RequestWrapper)) {
-//			LOGGER.error("receive message error,only support RequestWrapper");
-//			throw new Exception(
-//					"receive message error,only support RequestWrapper");
-//		}
-		List<RequestWrapper> requests = (List<RequestWrapper>) message;
-		for (final RequestWrapper request : requests) {
-			try {
-				threadpool.execute(new Runnable() {
-					public void run() {
-						long beginTime = System.currentTimeMillis();
-						ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler().handleRequest(request);
-						int consumeTime = Integer.parseInt(""+ (System.currentTimeMillis() - beginTime));
-						// already timeout,so not return
-						if (consumeTime >= request.getTimeout()) {
-							LOGGER.warn("timeout,so give up send response to client,requestId is:"
-									+ request.getId()
-									+ ",client is:"
-									+ session.getRemoteAddress()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
-							return;
-						}
-						WriteFuture wf = session.write(responseWrapper);
-						wf.addListener(new IoFutureListener() {
-							public void operationComplete(IoFuture future) {
-								WriteFuture writeFuture = (WriteFuture) future;
-								if (!writeFuture.isWritten()) {
-									LOGGER.error("server write response error,maybe sendbuffer full or session is closed,session connected status: "
-											+ session.isConnected());
-								}
-							}
-						});
-					}
-				});
-			} 
-			catch (RejectedExecutionException exception) {
-				LOGGER.error("server threadpool full,threadpool maxsize is:"
-						+ ((ThreadPoolExecutor) threadpool).getMaximumPoolSize());
-				ResponseWrapper responseWrapper = new ResponseWrapper();
-				responseWrapper.setRequestId(request.getId());
-				responseWrapper
-						.setException(new Exception("server threadpool full,maybe because server is slow or too many requests"));
-				WriteFuture wf = session.write(responseWrapper);
-				wf.addListener(new IoFutureListener() {
-					public void operationComplete(IoFuture future) {
-						WriteFuture writeFuture = (WriteFuture) future;
-						if (!writeFuture.isWritten()) {
-							LOGGER.error("server write response error,maybe sendbuffer full or session is closed,session connected status: "
-									+ session.isConnected());
-						}
-					}
-				});
+		if (!(message instanceof RequestWrapper) && !(message instanceof List)) {
+			LOGGER.error("receive message error,only support RequestWrapper || List");
+			throw new Exception(
+					"receive message error,only support RequestWrapper || List");
+		}
+		if(message instanceof List){
+			@SuppressWarnings("unchecked")
+			List<RequestWrapper> requests = (List<RequestWrapper>) message;
+			for (final RequestWrapper request : requests) {
+				handleOneRequest(session, request);
 			}
+		}
+		else{
+			handleOneRequest(session, (RequestWrapper)message);
+		}
+	}
+
+	private void handleOneRequest(final IoSession session, final RequestWrapper request) {
+		try {
+			threadpool.execute(new Runnable() {
+				public void run() {
+					long beginTime = System.currentTimeMillis();
+					ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler(request.getProtocolType()).handleRequest(request);
+					int consumeTime = Integer.parseInt(""+ (System.currentTimeMillis() - beginTime));
+					// already timeout,so not return
+					if (consumeTime >= request.getTimeout()) {
+						LOGGER.warn("timeout,so give up send response to client,requestId is:"
+								+ request.getId()
+								+ ",client is:"
+								+ session.getRemoteAddress()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
+						return;
+					}
+					WriteFuture wf = session.write(responseWrapper);
+					wf.addListener(new IoFutureListener() {
+						public void operationComplete(IoFuture future) {
+							WriteFuture writeFuture = (WriteFuture) future;
+							if (!writeFuture.isWritten()) {
+								LOGGER.error("server write response error,maybe sendbuffer full or session is closed,session connected status: "
+										+ session.isConnected());
+							}
+						}
+					});
+				}
+			});
+		} 
+		catch (RejectedExecutionException exception) {
+			LOGGER.error("server threadpool full,threadpool maxsize is:"
+					+ ((ThreadPoolExecutor) threadpool).getMaximumPoolSize());
+			ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(),request.getCodecType(),request.getProtocolType());
+			responseWrapper
+					.setException(new Exception("server threadpool full,maybe because server is slow or too many requests"));
+			WriteFuture wf = session.write(responseWrapper);
+			wf.addListener(new IoFutureListener() {
+				public void operationComplete(IoFuture future) {
+					WriteFuture writeFuture = (WriteFuture) future;
+					if (!writeFuture.isWritten()) {
+						LOGGER.error("server write response error,maybe sendbuffer full or session is closed,session connected status: "
+								+ session.isConnected());
+					}
+				}
+			});
 		}
 	}
 

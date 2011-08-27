@@ -21,8 +21,8 @@ public class MinaClientInvocationHandler extends
 
 	public MinaClientInvocationHandler(List<InetSocketAddress> servers,
 			int clientNums, int connectTimeout, String targetInstanceName,
-			Map<String, Integer> methodTimeouts,int dataType) {
-		super(servers, clientNums, connectTimeout, targetInstanceName, methodTimeouts, dataType);
+			Map<String, Integer> methodTimeouts,int codecType, int protocolType) {
+		super(servers, clientNums, connectTimeout, targetInstanceName, methodTimeouts, codecType, protocolType);
 	}
 
 	public ClientFactory getClientFactory() {

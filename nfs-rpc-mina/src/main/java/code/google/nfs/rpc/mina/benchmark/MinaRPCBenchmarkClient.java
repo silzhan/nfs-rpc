@@ -28,12 +28,12 @@ public class MinaRPCBenchmarkClient extends AbstractRPCBenchmarkClient {
 	public BenchmarkTestService getProxyInstance(
 			List<InetSocketAddress> servers, int clientNums,
 			int connectTimeout, String targetInstanceName,
-			Map<String, Integer> methodTimeouts, int codectype) {
+			Map<String, Integer> methodTimeouts, int codectype, Integer protocolType) {
 		return (BenchmarkTestService) Proxy.newProxyInstance(
 				MinaRPCBenchmarkClient.class.getClassLoader(),
 				new Class<?>[] { BenchmarkTestService.class },
 				new MinaClientInvocationHandler(servers, clientNums,
-						connectTimeout, targetInstanceName, methodTimeouts,codectype));
+						connectTimeout, targetInstanceName, methodTimeouts,codectype, protocolType));
 	}
 
 }
