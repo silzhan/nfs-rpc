@@ -70,4 +70,8 @@ public class MinaByteBufferWrapper implements ByteBufferWrapper {
 		return byteBuffer;
 	}
 
+	public void writeByte(int index, byte data) {
+		byteBuffer.put(index,data);
+	}
+
 }

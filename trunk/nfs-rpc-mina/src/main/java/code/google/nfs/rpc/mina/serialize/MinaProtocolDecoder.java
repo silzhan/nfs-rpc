@@ -10,7 +10,7 @@ import org.apache.mina.common.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
-import code.google.nfs.rpc.ProtocolFactory;
+import code.google.nfs.rpc.protocol.ProtocolUtils;
 /**
  * decode receive message
  * 
@@ -20,7 +20,7 @@ public class MinaProtocolDecoder extends CumulativeProtocolDecoder {
 	
 	protected boolean doDecode(IoSession session, ByteBuffer in, ProtocolDecoderOutput out) throws Exception {
 		MinaByteBufferWrapper wrapper = new MinaByteBufferWrapper(in);
-		Object returnObject = ProtocolFactory.getProtocol().decode(wrapper, false);
+		Object returnObject = ProtocolUtils.decode(wrapper, false);
 		if(returnObject instanceof Boolean){
 			return false;
 		}

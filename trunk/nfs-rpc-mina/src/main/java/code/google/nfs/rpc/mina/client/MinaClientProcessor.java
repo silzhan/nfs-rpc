@@ -41,29 +41,27 @@ public class MinaClientProcessor extends IoHandlerAdapter {
 	}
 	
 	public void messageReceived(IoSession session, Object message) throws Exception {
-//		if(!(message instanceof ResponseWrapper)){
-//			LOGGER.error("receive message error,only support ResponseWrapper");
-//			throw new Exception("receive message error,only support ResponseWrapper");
-//		}
-		List<ResponseWrapper> response = (List<ResponseWrapper>)message;
-//		if(isDebugEnabled){
-			// for performance trace
-//			LOGGER.debug("receive response from server: "+session.getRemoteAddress()+", request id is:"+response.getRequestId());
-//		}
-		client.putResponses(response);
-//		responses.add(response);
-//		receiveResponseIndex ++;
-//		if(receiveResponseIndex > MIN_RESPONSES || System.nanoTime() - checkTime >= 1000000){
-//			try{
-//				client.putResponse(responses);
-//			}
-//			catch(Exception e){
-//				LOGGER.error("receive message from :"+session.getRemoteAddress()+",but occurs error",e);
-//			}
-//			responses.clear();
-//			receiveResponseIndex = 0;
-//			checkTime = System.nanoTime();
-//		}
+		if(message instanceof List){
+			@SuppressWarnings("unchecked")
+			List<ResponseWrapper> responses = (List<ResponseWrapper>)message;
+			if(isDebugEnabled){
+				// for performance trace
+				LOGGER.debug("receive response list from server: "+session.getRemoteAddress()+",list size is:"+responses.size());
+			}
+			client.putResponses(responses);
+		}
+		else if(message instanceof ResponseWrapper){
+			ResponseWrapper response = (ResponseWrapper)message;
+			if(isDebugEnabled){
+				// for performance trace
+				LOGGER.debug("receive response list from server: "+session.getRemoteAddress()+",request is:"+response.getRequestId());
+			}
+			client.putResponse(response);
+		}
+		else{
+			LOGGER.error("receive message error,only support List || ResponseWrapper");
+			throw new Exception("receive message error,only support List || ResponseWrapper");
+		}
 	}
 	
 	public void exceptionCaught(IoSession session, Throwable cause)
