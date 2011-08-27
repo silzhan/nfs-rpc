@@ -23,8 +23,6 @@ import code.google.nfs.rpc.ResponseWrapper;
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
 public class NettyClientHandler extends SimpleChannelUpstreamHandler {
-
-//	private static final int MIN_RESPONSES = 60;
 	
 	private static final Log LOGGER = LogFactory.getLog(NettyClientHandler.class);
 	
@@ -35,12 +33,6 @@ public class NettyClientHandler extends SimpleChannelUpstreamHandler {
 	private String key;
 	
 	private NettyClient client;
-	
-//	private int receiveResponseIndex = 0;
-//	
-//	private long checkTime = 0;
-//	
-//	private List<ResponseWrapper> responses = new ArrayList<ResponseWrapper>();
 	
 	public NettyClientHandler(NettyClientFactory factory,String key){
 		this.factory = factory;
@@ -53,27 +45,27 @@ public class NettyClientHandler extends SimpleChannelUpstreamHandler {
 	
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
-		@SuppressWarnings("unchecked")
-		List<ResponseWrapper> responses = (List<ResponseWrapper>)e.getMessage();
-//		if(isDebugEnabled){
-			// for performance trace
-//			LOGGER.debug("receive response from server: "+ctx.getChannel().getRemoteAddress()+",request id is:"+response.getRequestId());
-//		}
-		client.putResponses(responses);
-//		responses.add(response);
-//		receiveResponseIndex ++;
-//		if(receiveResponseIndex > MIN_RESPONSES || System.nanoTime() - checkTime >= 1000000){
-//			try{
-//				client.putResponse(responses);
-//			}
-//			catch(Exception t){
-//				throw t;
-//				// LOGGER.error("receive message from :"+session.getRemoteAddress()+",but occurs error",e);
-//			}
-//			responses.clear();
-//			receiveResponseIndex = 0;
-//			checkTime = System.nanoTime();
-//		}
+		if(e.getMessage() instanceof List){
+			@SuppressWarnings("unchecked")
+			List<ResponseWrapper> responses = (List<ResponseWrapper>)e.getMessage();
+			if(isDebugEnabled){
+				// for performance trace
+				LOGGER.debug("receive response list from server: "+ctx.getChannel().getRemoteAddress()+",list size is:"+responses.size());
+			}
+			client.putResponses(responses);
+		}
+		else if(e.getMessage() instanceof ResponseWrapper){
+			ResponseWrapper response = (ResponseWrapper)e.getMessage();
+			if(isDebugEnabled){
+				// for performance trace
+				LOGGER.debug("receive response list from server: "+ctx.getChannel().getRemoteAddress()+",request is:"+response.getRequestId());
+			}
+			client.putResponse(response);
+		}
+		else{
+			LOGGER.error("receive message error,only support List || ResponseWrapper");
+			throw new Exception("receive message error,only support List || ResponseWrapper");
+		}
 	}
 	
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
