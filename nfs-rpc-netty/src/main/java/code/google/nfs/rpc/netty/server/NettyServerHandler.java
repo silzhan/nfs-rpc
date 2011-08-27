@@ -47,46 +47,57 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 	
 	public void messageReceived(final ChannelHandlerContext ctx, MessageEvent e)
 		throws Exception {
-		if(!(e.getMessage() instanceof List)){
-			LOGGER.error("receive List error,only support List");
-			throw new Exception("receive List error,only support List");
+		Object message = e.getMessage();
+		if (!(message instanceof RequestWrapper) && !(message instanceof List)) {
+			LOGGER.error("receive message error,only support RequestWrapper || List");
+			throw new Exception(
+					"receive message error,only support RequestWrapper || List");
 		}
-		@SuppressWarnings("unchecked")
-		final List<RequestWrapper> requests = (List<RequestWrapper>) e.getMessage();
-		for (final RequestWrapper request : requests) {
-			try{
-				threadpool.execute(new Runnable() {
-					public void run() {
-						long beginTime = System.currentTimeMillis();
-						ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler().handleRequest(request);
-						int consumeTime = Integer.parseInt(""+(System.currentTimeMillis() - beginTime));
-						// timeout,so not return
-						if(consumeTime >= request.getTimeout()){
-							LOGGER.warn("timeout,so give up send response to client,request id is:"
-									+ request.getId()
-									+ ",client is:"
-									+ ctx.getChannel().getRemoteAddress()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
-							return;
-						}
-						ChannelFuture wf = ctx.getChannel().write(responseWrapper);
-						wf.awaitUninterruptibly(request.getTimeout());
-						if(!wf.isSuccess()){
-							LOGGER.error("server write response error,request id is: "+request.getId());
-						}
-					}
-				});
+		if(message instanceof List){
+			@SuppressWarnings("unchecked")
+			List<RequestWrapper> requests = (List<RequestWrapper>) message;
+			for (final RequestWrapper request : requests) {
+				handleOneRequest(ctx, request);
 			}
-			catch(RejectedExecutionException exception){
-				LOGGER.error("server threadpool full,threadpool maxsize is:"
-						+ ((ThreadPoolExecutor) threadpool).getMaximumPoolSize());
-				ResponseWrapper responseWrapper = new ResponseWrapper();
-				responseWrapper.setRequestId(request.getId());
-				responseWrapper.setException(new Exception("server threadpool full,maybe because server is slow or too many requests"));
-				ChannelFuture wf = ctx.getChannel().write(responseWrapper);
-				wf.awaitUninterruptibly(request.getTimeout());
-				if(!wf.isSuccess()){
-					LOGGER.error("server write response error,request id is: "+request.getId());
+		}
+		else{
+			handleOneRequest(ctx, (RequestWrapper)message);
+		}
+	}
+	
+	private void handleOneRequest(final ChannelHandlerContext ctx, final RequestWrapper request) {
+		try {
+			threadpool.execute(new Runnable() {
+				public void run() {
+					long beginTime = System.currentTimeMillis();
+					ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler(request.getProtocolType()).handleRequest(request);
+					int consumeTime = Integer.parseInt(""+ (System.currentTimeMillis() - beginTime));
+					// already timeout,so not return
+					if (consumeTime >= request.getTimeout()) {
+						LOGGER.warn("timeout,so give up send response to client,requestId is:"
+								+ request.getId()
+								+ ",client is:"
+								+ ctx.getChannel().getRemoteAddress()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
+						return;
+					}
+					ChannelFuture wf = ctx.getChannel().write(responseWrapper);
+					wf.awaitUninterruptibly(request.getTimeout());
+					if(!wf.isSuccess()){
+						LOGGER.error("server write response error,request id is: "+request.getId());
+					}
 				}
+			});
+		} 
+		catch (RejectedExecutionException exception) {
+			LOGGER.error("server threadpool full,threadpool maxsize is:"
+					+ ((ThreadPoolExecutor) threadpool).getMaximumPoolSize());
+			ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(),request.getCodecType(),request.getProtocolType());
+			responseWrapper
+					.setException(new Exception("server threadpool full,maybe because server is slow or too many requests"));
+			ChannelFuture wf = ctx.getChannel().write(responseWrapper);
+			wf.awaitUninterruptibly(request.getTimeout());
+			if(!wf.isSuccess()){
+				LOGGER.error("server write response error,request id is: "+request.getId());
 			}
 		}
 	}

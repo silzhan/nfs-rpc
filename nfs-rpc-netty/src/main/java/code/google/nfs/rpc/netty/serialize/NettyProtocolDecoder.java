@@ -17,7 +17,7 @@ import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
 
-import code.google.nfs.rpc.ProtocolFactory;
+import code.google.nfs.rpc.protocol.ProtocolUtils;
 /**
  * decode byte[]
  * 	change to pipeline receive requests or responses,let's IO thread do less thing
@@ -55,7 +55,7 @@ public class NettyProtocolDecoder extends FrameDecoder {
 	
 	protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer in) throws Exception {
 		NettyByteBufferWrapper wrapper = new NettyByteBufferWrapper(in);
-		return ProtocolFactory.getProtocol().decode(wrapper, null);
+		return ProtocolUtils.decode(wrapper, null);
 	}
 	
 	private void callDecode(
@@ -84,7 +84,8 @@ public class NettyProtocolDecoder extends FrameDecoder {
             
             results.add(frame);
         }
-        unfoldAndFireMessageReceived(context, remoteAddress, results);
+        if(results.size() > 0)
+        	unfoldAndFireMessageReceived(context, remoteAddress, results);
     }
 
     private void unfoldAndFireMessageReceived(ChannelHandlerContext context, SocketAddress remoteAddress, Object result) {

@@ -44,6 +44,8 @@ public class NettyServer implements Server {
 		bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
 				Executors.newCachedThreadPool(serverBossTF),
 				Executors.newCachedThreadPool(serverWorkerTF)));
+		bootstrap.setOption("tcpNoDelay", true);
+		bootstrap.setOption("reuseAddress", true);
 	}
 
 	public void start(int listenPort, final ExecutorService threadPool) throws Exception {
@@ -63,8 +65,8 @@ public class NettyServer implements Server {
 		LOGGER.warn("Server started,listen at: "+listenPort);
 	}
 
-	public void registerProcessor(String serviceName, Object serviceInstance) {
-		ProtocolFactory.getServerHandler().registerProcessor(serviceName, serviceInstance);
+	public void registerProcessor(Integer protocolType,String serviceName, Object serviceInstance) {
+		ProtocolFactory.getServerHandler(protocolType).registerProcessor(serviceName, serviceInstance);
 	}
 	
 	public void stop() throws Exception {

@@ -71,4 +71,8 @@ public class NettyByteBufferWrapper implements ByteBufferWrapper {
 		return buffer;
 	}
 
+	public void writeByte(int index, byte data) {
+		buffer.writeByte(data);
+	}
+
 }
