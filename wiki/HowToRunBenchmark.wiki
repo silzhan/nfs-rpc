@@ -1,7 +1,7 @@
 = Server =
 
   * u need change servercommon.sh,to set listenPort,maxThreads & responseSize;
-  * then u just need to execute minarpc.sh | nettyrpc.sh | minasimple.sh |  nettysimple.sh;
+  * then u just need to execute minaserver.sh | nettyserver.sh;
 
 = Client =
 
@@ -10,20 +10,22 @@
   * when benchmark finished,it'll print results to logs(minarpc.sh --> benchmark.log.mina.rpc etc.),just like belows:
   {{{
     ----------Benchmark Statistics--------------
-    Concurrents: 100
-    Runtime: 120 seconds
-    Benchmark Time: 50
-    Requests: 4515447 Success: 100% (4515447) Error: 0% (0)
-    Avg TPS: 75142 Max TPS: 77465 Min TPS: 71786
-    Avg RT: 1ms
-    RT <= 0: 0% 10509/4515447
-    RT (0,1]: 69% 3155532/4515447
-    RT (1,5]: 29% 1336741/4515447
-    RT (5,10]: 0% 7155/4515447
-    RT (10,50]: 0% 5510/4515447
-    RT (50,100]: 0% 0/4515447
-    RT (100,500]: 0% 0/4515447
-    RT (500,1000]: 0% 0/4515447
-    RT > 1000: 0% 0/4515447
+ 	Concurrents: 100
+	CodecType: 2
+	ClientNums: 1
+	RequestSize: 100 bytes
+	Runtime: 120 seconds
+	Benchmark Time: 90
+	Requests: 7742331 Success: 100% (7742331) Error: 0% (0)
+	Avg TPS: 86025 Max TPS: 87691 Min TPS: 84178
+	Avg RT: 1ms
+	RT <= 0: 1% 86783/7742331
+	RT (0,1]: 84% 6554802/7742331
+	RT (1,5]: 13% 1081314/7742331
+	RT (5,10]: 0% 101/7742331
+	RT (10,50]: 0% 19331/7742331
+	RT (50,100]: 0% 0/7742331
+	RT (100,500]: 0% 0/7742331
+	RT (500,1000]: 0% 0/7742331
+	RT > 1000: 0% 0/7742331
   }}}
-
