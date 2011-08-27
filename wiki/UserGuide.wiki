@@ -21,10 +21,8 @@ Use this rpc framework,u can realize rpc very simply.
     {{{
       public class MyMinaServer{
          public static void main(String[] args) throws Exception{
-              // use direct call RPC
-              ProtocolFactory.setType(TYPE.SIMPLE);
               Server server = new MinaServer();
-              server.registerProcessor("myprocessor",new MyProcessor());
+              server.registerProcessor(SimpleProcessorProtocol.TYPE,"myprocessor",new MyProcessor());
               ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
 	      ExecutorService threadPool = new ThreadPoolExecutor(20, 100,
 				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);
@@ -37,7 +35,6 @@ Use this rpc framework,u can realize rpc very simply.
   If u want to call MyProcessor,u can follow below steps.
   * Get Client instance
     {{{
-       ProtocolFactory.setType(TYPE.SIMPLE);
        // clientNums mean how much connection to server
        // we appreciate single connection to the same serverIP & serverPort 
        Client client = MinaClientFactory.getInstance().get(serverIP,serverPort,connectTimeOut,clientNums);
@@ -47,7 +44,7 @@ Use this rpc framework,u can realize rpc very simply.
        // rpcTimeout mean how long u will wait here for server return
        // datatype mean serialize/deserialize
        //       current only support Java or Hessian
-       String result=client.invokeSync("hello",rpcTimeout,Protocol.HESSIAN_DATA);
+       String result=client.invokeSync("hello",rpcTimeout,Protocol.HESSIAN_DATA,SimpleProcessorProtocol.TYPE);
     }}}
 
 == Reflection RPC ==
@@ -70,10 +67,8 @@ Use this rpc framework,u can realize rpc very simply.
    {{{
      public class MyMinaServer{
          public static void main(String[] args) throws Exception{
-              // use direct call RPC
-              ProtocolFactory.setType(TYPE.SIMPLE);
               Server server = new MinaServer();
-              server.registerProcessor("helloworld",new HelloWorldComponent());
+              server.registerProcessor(RPCProtocol.TYPE,"helloworld",new HelloWorldComponent());
               ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
 	      ExecutorService threadPool = new ThreadPoolExecutor(20, 100,
 				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);
@@ -94,7 +89,7 @@ Use this rpc framework,u can realize rpc very simply.
         HelloWorldService service = (HelloWorldService) Proxy.newProxyInstance(
 				this.getClass().getClassLoader(),
 				new Class<?>[] { HelloWorldService.class },
-				new MinaClientInvocationHandler(servers, clientNums,connectTimeout, "helloworld", methodTimeouts,datatype));
+				new MinaClientInvocationHandler(servers, clientNums,connectTimeout, "helloworld", methodTimeouts,codectype,RPCProtocol.TYPE));
     }}}
   * Use proxy to call
     {{{
