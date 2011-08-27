@@ -21,22 +21,26 @@ public class ResponseWrapper {
 	
 	private Throwable exception = null;
 	
-	private Integer codecType = Codecs.JAVA_CODEC;
+	private Integer codecType = Codecs.HESSIAN_CODEC;
+	
+	private Integer protocolType;
+	
+	public ResponseWrapper(Integer requestId,Integer codecType,Integer protocolType){
+		this.requestId = requestId;
+		this.codecType = codecType;
+		this.protocolType = protocolType;
+	}
+
+	public Integer getProtocolType() {
+		return protocolType;
+	}
 
 	public Integer getCodecType() {
 		return codecType;
 	}
 
-	public void setCodecType(Integer codecType) {
-		this.codecType = codecType;
-	}
-
 	public Integer getRequestId() {
 		return requestId;
-	}
-
-	public void setRequestId(int requestId) {
-		this.requestId = requestId;
 	}
 
 	public Object getResponse() {

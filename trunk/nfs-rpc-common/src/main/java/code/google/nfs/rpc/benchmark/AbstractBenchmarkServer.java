@@ -14,7 +14,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import code.google.nfs.rpc.NamedThreadFactory;
+import code.google.nfs.rpc.protocol.RPCProtocol;
+import code.google.nfs.rpc.protocol.SimpleProcessorProtocol;
 import code.google.nfs.rpc.server.Server;
+import code.google.nfs.rpc.server.ServerProcessor;
 
 
 /**
@@ -43,17 +46,17 @@ public abstract class AbstractBenchmarkServer {
 				+ responseSize + " bytes");
 
 		Server server = getServer();
-		server.registerProcessor("testservice", getServerProcessor(responseSize));
+		server.registerProcessor(SimpleProcessorProtocol.TYPE,"directcall", new ServerProcessor() {
+			public Object handle(Object request) throws Exception {
+				return new ResponseObject(responseSize);
+			}
+		});
+		server.registerProcessor(RPCProtocol.TYPE, "testservice", new BenchmarkTestServiceImpl(responseSize));
 		ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
 		ExecutorService threadPool = new ThreadPoolExecutor(20, maxThreads,
 				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);
 		server.start(listenPort, threadPool);
 	}
-
-	/**
-	 * get Server Processor
-	 */
-	public abstract Object getServerProcessor(int responseSize);
 	
 	/**
 	 * Get server instance

@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import code.google.nfs.rpc.client.ClientFactory;
+import code.google.nfs.rpc.protocol.SimpleProcessorProtocol;
 /**
  * Simple Processor RPC Benchmark Client Thread
  * 
@@ -110,7 +111,7 @@ public class SimpleProcessorBenchmarkClientRunnable implements ClientRunnable {
 			try {
 				ResponseObject response = (ResponseObject) factory.get(
 						targetIP, targetPort, 1000, clientNums).invokeSync(
-						new RequestObject(requestSize), rpcTimeout, codecType);
+						new RequestObject(requestSize), rpcTimeout, codecType, SimpleProcessorProtocol.TYPE);
 				long currentTime = System.currentTimeMillis();
 				if(beginTime <= startTime){
 					continue;

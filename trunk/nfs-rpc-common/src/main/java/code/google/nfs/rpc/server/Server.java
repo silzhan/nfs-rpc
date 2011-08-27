@@ -21,7 +21,7 @@ public interface Server {
 	/**
 	 * register business handler
 	 */
-	public void registerProcessor(String serviceName,Object serviceInstance);
+	public void registerProcessor(Integer protocolType,String serviceName,Object serviceInstance);
 	
 	/**
 	 * stop server

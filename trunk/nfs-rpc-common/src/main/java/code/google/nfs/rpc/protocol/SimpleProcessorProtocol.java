@@ -13,12 +13,13 @@ import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 
 /**
- * Simple Processor Protocol
+ * Protocol Header
+ * 	VERSION(1B): Protocol Version
+ *  TYPE(1B):    Protocol Type,so u can custom your protocol
+ *  Simple Processor Protocol
  * 	VERSION(1B):   
  *  TYPE(1B):      request/response 
  *  CODECTYPE(1B):  serialize/deserialize type
- *  KEEPED(1B):    
- *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  KEEPED(1B):    
@@ -31,9 +32,11 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public class SimpleProcessorProtocol implements Protocol{
 	
+	public static final Integer TYPE = 2;
+	
 	private static final Log LOGGER = LogFactory.getLog(SimpleProcessorProtocol.class);
 	
-	private static final int HEADER_LEN = 1 * 8 + 3 * 4;
+	private static final int CUSTOMPROTOCOL_HEADER_LEN = 1 * 6 + 3 * 4;
 	
 	private static final byte VERSION = (byte)1;
 	
@@ -78,13 +81,13 @@ public class SimpleProcessorProtocol implements Protocol{
 			}
 			type = RESPONSE;
 		}
-		int capacity = HEADER_LEN + body.length;
+		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + body.length;
 		ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
+		byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
+		byteBuffer.writeByte((byte)TYPE.intValue());
 		byteBuffer.writeByte(VERSION);
 		byteBuffer.writeByte(type);
 		byteBuffer.writeByte((byte)codecType.intValue());
-		byteBuffer.writeByte((byte)0);
-		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);
@@ -95,9 +98,15 @@ public class SimpleProcessorProtocol implements Protocol{
 		return byteBuffer;
 	}
 	
-	public Object decode(ByteBufferWrapper wrapper,Object errorObject) throws Exception{
-		final int originPos = wrapper.readerIndex();
-		if(wrapper.readableBytes() < HEADER_LEN){
+	public Object decode(ByteBufferWrapper wrapper,Object errorObject,int...originPosArray) throws Exception{
+		final int originPos;
+		if(originPosArray!=null && originPosArray.length == 1){
+			originPos = originPosArray[0];
+		}
+		else{
+			originPos = wrapper.readerIndex();
+		}
+		if(wrapper.readableBytes() < CUSTOMPROTOCOL_HEADER_LEN){
 			wrapper.setReaderIndex(originPos);
         	return errorObject;
         }
@@ -105,8 +114,6 @@ public class SimpleProcessorProtocol implements Protocol{
         if(version == (byte)1){
         	byte type = wrapper.readByte();
         	int codecType = wrapper.readByte();
-    		wrapper.readByte();
-    		wrapper.readByte();
     		wrapper.readByte();
     		wrapper.readByte();
     		wrapper.readByte();
@@ -120,14 +127,12 @@ public class SimpleProcessorProtocol implements Protocol{
     		byte[] body = new byte[expectedLen];
     		wrapper.readBytes(body);
         	if(type == REQUEST){
-        		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId,codecType);
+        		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId,codecType, TYPE);
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
-        		ResponseWrapper responseWrapper = new ResponseWrapper();
-            	responseWrapper.setRequestId(requestId);
+        		ResponseWrapper responseWrapper = new ResponseWrapper(requestId,codecType,TYPE);
             	responseWrapper.setResponse(body);
-            	responseWrapper.setCodecType(codecType);
 	        	return responseWrapper;
         	}
         	else{

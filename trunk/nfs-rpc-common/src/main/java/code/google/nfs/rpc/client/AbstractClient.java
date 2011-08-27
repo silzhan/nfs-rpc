@@ -37,17 +37,17 @@ public abstract class AbstractClient implements Client {
 	protected static ConcurrentHashMap<Integer, ArrayBlockingQueue<Object>> responses = 
 			new ConcurrentHashMap<Integer, ArrayBlockingQueue<Object>>();
 
-	public Object invokeSync(Object message, int timeout, int dataType)
+	public Object invokeSync(Object message, int timeout, int codecType, int protocolType)
 			throws Exception {
-		RequestWrapper wrapper = new RequestWrapper(message, timeout, dataType);
+		RequestWrapper wrapper = new RequestWrapper(message, timeout, codecType, protocolType);
 		return invokeSyncIntern(wrapper);
 	}
 
 	public Object invokeSync(String targetInstanceName, String methodName,
-			String[] argTypes, Object[] args, int timeout, int dataType)
+			String[] argTypes, Object[] args, int timeout, int codecType, int protocolType)
 			throws Exception {
 		RequestWrapper wrapper = new RequestWrapper(targetInstanceName,
-				methodName, argTypes, args, timeout, dataType);
+				methodName, argTypes, args, timeout, codecType, protocolType);
 		return invokeSyncIntern(wrapper);
 	}
 

@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
+import code.google.nfs.rpc.protocol.RPCProtocol;
+
 /**
  * Test for RPC based on reflection Benchmark
  * 
@@ -28,7 +30,7 @@ public abstract class AbstractRPCBenchmarkClient extends AbstractBenchmarkClient
 		List<InetSocketAddress> servers = new ArrayList<InetSocketAddress>();
 		servers.add(new InetSocketAddress(targetIP, targetPort));
 		return new RPCBenchmarkClientRunnable(
-				getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts, codecType), 
+				getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts, codecType, RPCProtocol.TYPE), 
 				requestSize, barrier, latch, startTime, endTime);
 	}
 	
@@ -38,6 +40,6 @@ public abstract class AbstractRPCBenchmarkClient extends AbstractBenchmarkClient
 	public abstract BenchmarkTestService getProxyInstance(
 			List<InetSocketAddress> servers, int clientNums,
 			int connectTimeout, String targetInstanceName,
-			Map<String, Integer> methodTimeouts, int datatype);
+			Map<String, Integer> methodTimeouts, int codectype, Integer protocolType);
 
 }

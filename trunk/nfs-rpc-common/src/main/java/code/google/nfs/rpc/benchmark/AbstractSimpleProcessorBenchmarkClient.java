@@ -8,8 +8,6 @@ package code.google.nfs.rpc.benchmark;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
-import code.google.nfs.rpc.ProtocolFactory;
-import code.google.nfs.rpc.ProtocolFactory.TYPE;
 import code.google.nfs.rpc.client.ClientFactory;
 /**
  * Test for RPC based on direct call Benchmark
@@ -21,7 +19,6 @@ public abstract class AbstractSimpleProcessorBenchmarkClient extends AbstractBen
 	public ClientRunnable getClientRunnable(String targetIP, int targetPort,
 			int clientNums, int rpcTimeout, int dataType, int requestSize,
 			CyclicBarrier barrier, CountDownLatch latch, long endTime ,long startTime) {
-		ProtocolFactory.setProtocol(TYPE.SIMPLE);
 		return new SimpleProcessorBenchmarkClientRunnable(
 				getClientFactory(), targetIP, targetPort,
 				clientNums, rpcTimeout, dataType, requestSize, barrier, latch,

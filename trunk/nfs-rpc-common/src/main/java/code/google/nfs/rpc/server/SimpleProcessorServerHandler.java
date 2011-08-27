@@ -27,9 +27,7 @@ public class SimpleProcessorServerHandler implements ServerHandler{
 	}
 	
 	public ResponseWrapper handleRequest(final RequestWrapper request){
-		ResponseWrapper responseWrapper = new ResponseWrapper();
-		responseWrapper.setRequestId(request.getId());
-		responseWrapper.setCodecType(request.getCodecType());
+		ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(),request.getCodecType(),request.getProtocolType());
 		try{
 			Object requestObject = Codecs.getDecoder(request.getCodecType()).decode((byte[])request.getMessage());
 			responseWrapper.setResponse(processor.handle(requestObject));
