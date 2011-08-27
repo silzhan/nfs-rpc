@@ -27,19 +27,23 @@ public abstract class AbstractClientInvocationHandler implements InvocationHandl
 	
 	private String targetInstanceName;
 	
-	private int dataType;
+	private int codecType;
+	
+	private int protocolType;
 	
 	// per method timeout,some special method use methodName.toLowerCase to set timeout,other use *
 	private Map<String, Integer> methodTimeouts;
 	
 	public AbstractClientInvocationHandler(List<InetSocketAddress> servers,int clientNums,int connectTimeout,
-										   String targetInstanceName,Map<String, Integer> methodTimeouts,int dataType){
+										   String targetInstanceName,Map<String, Integer> methodTimeouts,
+										   int codecType,int protocolType){
 		this.servers = Collections.unmodifiableList(servers);
 		this.clientNums = clientNums;
 		this.connectTimeout = connectTimeout;
 		this.methodTimeouts = methodTimeouts;
 		this.targetInstanceName = targetInstanceName;
-		this.dataType = dataType;
+		this.codecType = codecType;
+		this.protocolType = protocolType;
 	}
 	
 	public void updateServers(List<InetSocketAddress> servers){
@@ -66,7 +70,7 @@ public abstract class AbstractClientInvocationHandler implements InvocationHandl
 		else{
 			timeout = methodTimeouts.get("*");
 		}
-		return client.invokeSync(targetInstanceName, methodName, argTypes, args, timeout, dataType);
+		return client.invokeSync(targetInstanceName, methodName, argTypes, args, timeout, codecType, protocolType);
 	}
 	
 	private String[] createParamSignature(Class<?>[] argTypes) {

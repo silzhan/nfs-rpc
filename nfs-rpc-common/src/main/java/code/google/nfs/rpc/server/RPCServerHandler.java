@@ -47,9 +47,7 @@ public class RPCServerHandler implements ServerHandler {
 	}
 	
 	public ResponseWrapper handleRequest(final RequestWrapper request){
-		ResponseWrapper responseWrapper = new ResponseWrapper();
-		responseWrapper.setRequestId(request.getId());
-		responseWrapper.setCodecType(request.getCodecType());
+		ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(),request.getCodecType(),request.getProtocolType());
 		String targetInstanceName = request.getTargetInstanceName();
 		String methodName = request.getMethodName();
 		String[] argTypes = request.getArgTypes();

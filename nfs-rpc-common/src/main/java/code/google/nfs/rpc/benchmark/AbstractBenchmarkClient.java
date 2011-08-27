@@ -220,6 +220,7 @@ public abstract class AbstractBenchmarkClient {
 		System.out.println("----------Benchmark Statistics--------------");
 		System.out.println(" Concurrents: " + concurrents);
 		System.out.println(" CodecType: " + codectype);
+		System.out.println(" ClientNums: " + clientNums);
 		System.out.println(" RequestSize: " + requestSize + " bytes");
 		System.out.println(" Runtime: " + runtime + " seconds");
 		System.out.println(" Benchmark Time: " + times.keySet().size());

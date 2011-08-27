@@ -29,6 +29,6 @@ public interface Protocol {
 	 * @return Object 
 	 * @throws Exception
 	 */
-	public Object decode(ByteBufferWrapper wrapper, Object errorObject) throws Exception;
+	public Object decode(ByteBufferWrapper wrapper, Object errorObject,int...originPos) throws Exception;
 
 }

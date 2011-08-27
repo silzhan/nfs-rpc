@@ -22,11 +22,12 @@ public interface Client {
 	 * 
 	 * @param message
 	 * @param timeout
-	 * @param dataType data serialize/deserialize type
+	 * @param codecType serialize/deserialize type
+	 * @param protocolType
 	 * @return Object
 	 * @throws Exception
 	 */
-	public Object invokeSync(Object message, int timeout, int dataType)
+	public Object invokeSync(Object message, int timeout, int codecType, int protocolType)
 			throws Exception;
 
 	/**
@@ -42,14 +43,15 @@ public interface Client {
 	 *            send to server request args
 	 * @param timeout
 	 *            rcp timeout
-	 * @param dataType
-	 *            data serialize/deserialize type
+	 * @param codecType
+	 *            serialize/deserialize type
+	 * @param protocolType
 	 * @return Object return response
 	 * @throws Exception
 	 *             if some exception,then will be throwed
 	 */
 	public Object invokeSync(String targetInstanceName, String methodName,
-			String[] argTypes, Object[] args, int timeout, int dataType)
+			String[] argTypes, Object[] args, int timeout, int codecType, int protocolType)
 			throws Exception;
 
 	/**

@@ -14,6 +14,8 @@ public interface ByteBufferWrapper {
 
 	public ByteBufferWrapper get(int capacity);
 	
+	public void writeByte(int index,byte data);
+	
 	public void writeByte(byte data);
 	
 	public byte readByte();

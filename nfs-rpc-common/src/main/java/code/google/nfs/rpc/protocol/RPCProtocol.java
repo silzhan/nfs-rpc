@@ -18,12 +18,13 @@ import code.google.nfs.rpc.ResponseWrapper;
 /**
  * Common RPC Protocol
  * 
- * Request Protocol
+ * Protocol Header
+ * 	VERSION(1B): Protocol Version
+ *  TYPE(1B):    Protocol Type,so u can custom your protocol
+ *  Request Protocol
  * 	VERSION(1B):   
  *  TYPE(1B):      request/response 
  *  CODECTYPE(1B):  serialize/deserialize type
- *  KEEPED(1B):    
- *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  KEEPED(1B):    
@@ -46,13 +47,14 @@ import code.google.nfs.rpc.ResponseWrapper;
  *  ARG1
  *  ARG2
  *  ...
- *  
- * Response Protocol
+ * 
+ *  Protocol Header
+ * 	VERSION(1B): Protocol Version
+ *  TYPE(1B):    Protocol Type,so u can custom your protocol
+ *  Response Protocol
  *  VERSION(1B):   
  *  TYPE(1B):      request/response 
  *  DATATYPE(1B):  serialize/deserialize type
- *  KEEPED(1B):    
- *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  KEEPED(1B):    
@@ -64,11 +66,13 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public class RPCProtocol implements Protocol {
 	
+	public static final Integer TYPE = 1;
+	
 	private static final Log LOGGER = LogFactory.getLog(RPCProtocol.class);
 	
-	private static final int REQUEST_HEADER_LEN = 1 * 8 + 5 * 4;
+	private static final int REQUEST_HEADER_LEN = 1 * 6 + 5 * 4;
 	
-	private static final int RESPONSE_HEADER_LEN = 1 * 8 + 2 * 4;
+	private static final int RESPONSE_HEADER_LEN = 1 * 6 + 2 * 4;
 	
 	private static final byte VERSION = (byte)1;
 	
@@ -105,13 +109,13 @@ public class RPCProtocol implements Protocol {
 				byte[] methodNameByte = wrapper.getMethodName().getBytes();
 				id = wrapper.getId();
 				int timeout = wrapper.getTimeout();
-				int capacity = REQUEST_HEADER_LEN + requestArgTypesLen + requestArgsLen;
+				int capacity = ProtocolUtils.HEADER_LEN + REQUEST_HEADER_LEN + requestArgTypesLen + requestArgsLen;
 				ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
+				byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
+				byteBuffer.writeByte((byte)TYPE.intValue());
 				byteBuffer.writeByte(VERSION);
 				byteBuffer.writeByte(type);
 				byteBuffer.writeByte((byte)wrapper.getCodecType().intValue());
-				byteBuffer.writeByte((byte)0);
-				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
@@ -155,13 +159,13 @@ public class RPCProtocol implements Protocol {
 				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
 			}
 			type = RESPONSE;
-			int capacity = RESPONSE_HEADER_LEN + body.length;
+			int capacity = ProtocolUtils.HEADER_LEN + RESPONSE_HEADER_LEN + body.length;
 			ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
+			byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
+			byteBuffer.writeByte((byte)TYPE.intValue());
 			byteBuffer.writeByte(VERSION);
 			byteBuffer.writeByte(type);
 			byteBuffer.writeByte((byte)wrapper.getCodecType().intValue());
-			byteBuffer.writeByte((byte)0);
-			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
@@ -172,8 +176,14 @@ public class RPCProtocol implements Protocol {
 		}
 	}
 	
-	public Object decode(ByteBufferWrapper wrapper,Object errorObject) throws Exception{
-		final int originPos = wrapper.readerIndex();
+	public Object decode(ByteBufferWrapper wrapper,Object errorObject,int...originPosArray) throws Exception{
+		final int originPos;
+		if(originPosArray!=null && originPosArray.length == 1){
+			originPos = originPosArray[0];
+		}
+		else{
+			originPos = wrapper.readerIndex();
+		}
 		if(wrapper.readableBytes() < 2){
 			wrapper.setReaderIndex(originPos);
         	return errorObject;
@@ -187,8 +197,6 @@ public class RPCProtocol implements Protocol {
         			return errorObject;
         		}
         		int codecType = wrapper.readByte();
-        		wrapper.readByte();
-        		wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
@@ -237,7 +245,7 @@ public class RPCProtocol implements Protocol {
 					args[i] = argByte;
 				}
         		RequestWrapper requestWrapper = new RequestWrapper(targetInstanceName, methodName, 
-        														   argTypes, args, timeout, requestId, codecType);
+        														   argTypes, args, timeout, requestId, codecType, TYPE);
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
@@ -249,8 +257,6 @@ public class RPCProtocol implements Protocol {
         		wrapper.readByte();
         		wrapper.readByte();
         		wrapper.readByte();
-        		wrapper.readByte();
-        		wrapper.readByte();
             	int requestId = wrapper.readInt();
             	int bodyLen = wrapper.readInt();
             	if(wrapper.readableBytes() < bodyLen){
@@ -259,10 +265,8 @@ public class RPCProtocol implements Protocol {
             	}
             	byte[] bodyBytes = new byte[bodyLen];
             	wrapper.readBytes(bodyBytes);
-            	ResponseWrapper responseWrapper = new ResponseWrapper();
-            	responseWrapper.setRequestId(requestId);
+            	ResponseWrapper responseWrapper = new ResponseWrapper(requestId,codecType,TYPE);
             	responseWrapper.setResponse(bodyBytes);
-            	responseWrapper.setCodecType(codecType);
 	        	return responseWrapper;
         	}
         	else{
