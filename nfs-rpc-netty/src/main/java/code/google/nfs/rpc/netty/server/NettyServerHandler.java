@@ -67,26 +67,7 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 	
 	private void handleOneRequest(final ChannelHandlerContext ctx, final RequestWrapper request) {
 		try {
-			threadpool.execute(new Runnable() {
-				public void run() {
-					long beginTime = System.currentTimeMillis();
-					ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler(request.getProtocolType()).handleRequest(request);
-					int consumeTime = Integer.parseInt(""+ (System.currentTimeMillis() - beginTime));
-					// already timeout,so not return
-					if (consumeTime >= request.getTimeout()) {
-						LOGGER.warn("timeout,so give up send response to client,requestId is:"
-								+ request.getId()
-								+ ",client is:"
-								+ ctx.getChannel().getRemoteAddress()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
-						return;
-					}
-					ChannelFuture wf = ctx.getChannel().write(responseWrapper);
-					wf.awaitUninterruptibly(request.getTimeout());
-					if(!wf.isSuccess()){
-						LOGGER.error("server write response error,request id is: "+request.getId());
-					}
-				}
-			});
+			threadpool.execute(new HandlerRunnable(ctx, request));
 		} 
 		catch (RejectedExecutionException exception) {
 			LOGGER.error("server threadpool full,threadpool maxsize is:"
@@ -100,6 +81,38 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 				LOGGER.error("server write response error,request id is: "+request.getId());
 			}
 		}
+	}
+	
+	class HandlerRunnable implements Runnable{
+
+		private ChannelHandlerContext ctx;
+		
+		private RequestWrapper request;
+		
+		public HandlerRunnable(ChannelHandlerContext ctx,RequestWrapper request){
+			this.ctx = ctx;
+			this.request = request;
+		}
+		
+		public void run() {
+			long beginTime = System.currentTimeMillis();
+			ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler(request.getProtocolType()).handleRequest(request);
+			int consumeTime = Integer.parseInt(""+ (System.currentTimeMillis() - beginTime));
+			// already timeout,so not return
+			if (consumeTime >= request.getTimeout()) {
+				LOGGER.warn("timeout,so give up send response to client,requestId is:"
+						+ request.getId()
+						+ ",client is:"
+						+ ctx.getChannel().getRemoteAddress()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
+				return;
+			}
+			ChannelFuture wf = ctx.getChannel().write(responseWrapper);
+			wf.awaitUninterruptibly(request.getTimeout());
+			if(!wf.isSuccess()){
+				LOGGER.error("server write response error,request id is: "+request.getId());
+			}
+		}
+		
 	}
 	
 }
