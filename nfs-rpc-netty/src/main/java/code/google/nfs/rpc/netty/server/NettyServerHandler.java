@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.netty.channel.ChannelFuture;
+import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
@@ -76,10 +77,13 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 			responseWrapper
 					.setException(new Exception("server threadpool full,maybe because server is slow or too many requests"));
 			ChannelFuture wf = ctx.getChannel().write(responseWrapper);
-			wf.awaitUninterruptibly(request.getTimeout());
-			if(!wf.isSuccess()){
-				LOGGER.error("server write response error,request id is: "+request.getId());
-			}
+			wf.addListener(new ChannelFutureListener() {
+				public void operationComplete(ChannelFuture future) throws Exception {
+					if(!future.isSuccess()){
+						LOGGER.error("server write response error,request id is: "+request.getId());
+					}
+				}
+			});
 		}
 	}
 	
@@ -107,10 +111,13 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 				return;
 			}
 			ChannelFuture wf = ctx.getChannel().write(responseWrapper);
-			wf.awaitUninterruptibly(request.getTimeout());
-			if(!wf.isSuccess()){
-				LOGGER.error("server write response error,request id is: "+request.getId());
-			}
+			wf.addListener(new ChannelFutureListener() {
+				public void operationComplete(ChannelFuture future) throws Exception {
+					if(!future.isSuccess()){
+						LOGGER.error("server write response error,request id is: "+request.getId());
+					}
+				}
+			});
 		}
 		
 	}
