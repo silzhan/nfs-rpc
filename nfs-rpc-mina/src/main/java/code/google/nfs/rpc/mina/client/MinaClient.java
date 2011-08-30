@@ -17,6 +17,7 @@ import org.apache.mina.common.WriteFuture;
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 import code.google.nfs.rpc.client.AbstractClient;
+import code.google.nfs.rpc.client.Client;
 /**
  * Mina Client
  * 
@@ -40,9 +41,11 @@ public class MinaClient extends AbstractClient {
 		this.connectTimeout = connectTimeout;
 	}
 
-	public void sendRequest(final RequestWrapper wrapper, int timeout)
+	public void sendRequest(final RequestWrapper wrapper,final int timeout)
 			throws Exception {
+		final long beginTime = System.currentTimeMillis();
 		WriteFuture writeFuture = session.write(wrapper);
+		final Client self = this;
 		writeFuture.addListener(new IoFutureListener() {
 			public void operationComplete(IoFuture future) {
 				WriteFuture wfuture = (WriteFuture) future;
@@ -53,6 +56,9 @@ public class MinaClient extends AbstractClient {
 						+ session.getRemoteAddress()
 						+ " error,maybe because sendbuffer is full or connection closed: "
 						+ !session.isConnected();
+				if(System.currentTimeMillis() - beginTime >= timeout){
+					error = "write message to os send buffer timeout,consumetime is: "+(System.currentTimeMillis()-beginTime)+"ms,timeout is:"+timeout;
+				}
 				LOGGER.error(error);
 				ResponseWrapper response = new ResponseWrapper(wrapper.getId(),wrapper.getCodecType(),wrapper.getProtocolType());
 				response.setException(new Exception(error));
@@ -70,17 +76,11 @@ public class MinaClient extends AbstractClient {
 					session.close();
 				} 
 				else {
-					// TODO: 
-					MinaClientFactory.getInstance().removeClient(key, null);
+					// TODO: exception handle 
+					MinaClientFactory.getInstance().removeClient(key, self);
 				}
 			}
 		});
-		// if not write to os send buffer in timeout range
-		if (!writeFuture.join(timeout)) {
-			String error = "write message to send buffer error,maybe sendbuffer is full,so blocked so long("
-					+ timeout + " ms),current need write requests: "+session.getScheduledWriteRequests()+",bytes is: "+session.getScheduledWriteBytes();
-			throw new Exception(error);
-		}
 	}
 
 	public String getServerIP() {
