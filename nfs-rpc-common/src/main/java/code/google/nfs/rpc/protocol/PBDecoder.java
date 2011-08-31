@@ -6,15 +6,14 @@
  */
 package code.google.nfs.rpc.protocol;
 /**
- * Decoder Interface
+ * ProtocolBuf Decoder
  * 
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
-public interface Decoder {
+public class PBDecoder implements Decoder {
 
-	/**
-	 * decode byte[] to Object
-	 */
-	public Object decode(String className,byte[] bytes) throws Exception;
-	
+	public Object decode(String className,byte[] bytes) throws Exception {
+		return PBCoders.get(className).decode(bytes);
+	}
+
 }

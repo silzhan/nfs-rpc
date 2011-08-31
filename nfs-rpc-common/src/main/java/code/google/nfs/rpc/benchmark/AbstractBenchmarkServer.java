@@ -13,7 +13,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.google.protobuf.ByteString;
+
 import code.google.nfs.rpc.NamedThreadFactory;
+import code.google.nfs.rpc.protocol.PBCoders;
 import code.google.nfs.rpc.protocol.RPCProtocol;
 import code.google.nfs.rpc.protocol.SimpleProcessorProtocol;
 import code.google.nfs.rpc.server.Server;
@@ -46,9 +49,19 @@ public abstract class AbstractBenchmarkServer {
 				+ responseSize + " bytes");
 
 		Server server = getServer();
-		server.registerProcessor(SimpleProcessorProtocol.TYPE,"directcall", new ServerProcessor() {
+		server.registerProcessor(SimpleProcessorProtocol.TYPE,RequestObject.class.getName(), new ServerProcessor() {
 			public Object handle(Object request) throws Exception {
 				return new ResponseObject(responseSize);
+			}
+		});
+		// for pb codec
+		PBCoders.add(PB.RequestObject.class.getName(), new PBBenchmarkRequestCodec());
+		PBCoders.add(PB.ResponseObject.class.getName(), new PBBenchmarkResponseCodec());
+		server.registerProcessor(SimpleProcessorProtocol.TYPE,PB.RequestObject.class.getName(), new ServerProcessor() {
+			public Object handle(Object request) throws Exception {
+				PB.ResponseObject.Builder  builder = PB.ResponseObject.newBuilder();
+				builder.setBytesObject(ByteString.copyFrom(new byte[responseSize]));
+				return builder.build();
 			}
 		});
 		server.registerProcessor(RPCProtocol.TYPE, "testservice", new BenchmarkTestServiceImpl(responseSize));

@@ -76,7 +76,7 @@ public class RPCServerHandler implements ServerHandler {
 						.getRequestObjects();
 				for (int i = 0; i < tmprequestObjects.length; i++) {
 					try{
-						requestObjects[i] = Codecs.getDecoder(request.getCodecType()).decode((byte[])tmprequestObjects[i]);
+						requestObjects[i] = Codecs.getDecoder(request.getCodecType()).decode(request.getArgTypes()[i],(byte[])tmprequestObjects[i]);
 					}
 					catch(Exception e){
 						throw new Exception("decode request object args error",e);

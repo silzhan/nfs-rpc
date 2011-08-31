@@ -25,7 +25,9 @@ import code.google.nfs.rpc.ResponseWrapper;
  *  KEEPED(1B):    
  *  ID(4B):        request id
  *  TIMEOUT(4B):   request timeout
+ *  BodyClassNameLen(4B): body className Len
  *  LENGTH(4B):    body length
+ *  BodyClassName
  *  BODY
  *  
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
@@ -36,7 +38,7 @@ public class SimpleProcessorProtocol implements Protocol{
 	
 	private static final Log LOGGER = LogFactory.getLog(SimpleProcessorProtocol.class);
 	
-	private static final int CUSTOMPROTOCOL_HEADER_LEN = 1 * 6 + 3 * 4;
+	private static final int CUSTOMPROTOCOL_HEADER_LEN = 1 * 6 + 4 * 4;
 	
 	private static final byte VERSION = (byte)1;
 	
@@ -53,6 +55,7 @@ public class SimpleProcessorProtocol implements Protocol{
 		byte[] body = null;
 		int timeout = 0;
 		Integer codecType = 0;
+		byte[] className = null;
 		if(message instanceof RequestWrapper){
 			try{
 				RequestWrapper wrapper = (RequestWrapper) message;
@@ -60,6 +63,7 @@ public class SimpleProcessorProtocol implements Protocol{
 				body = Codecs.getEncoder(codecType).encode(wrapper.getMessage()); 
 				id = wrapper.getId();
 				timeout = wrapper.getTimeout();
+				className = wrapper.getMessage().getClass().getName().getBytes();
 			}
 			catch(Exception e){
 				LOGGER.error("encode request object error",e);
@@ -72,16 +76,18 @@ public class SimpleProcessorProtocol implements Protocol{
 				codecType = wrapper.getCodecType();
 				body = Codecs.getEncoder(codecType).encode(wrapper.getResponse()); 
 				id = wrapper.getRequestId();
+				className = wrapper.getResponse().getClass().getName().getBytes();
 			}
 			catch(Exception e){
 				LOGGER.error("encode response object error",e);
 				// still create response,so client can get it
 				wrapper.setResponse(new Exception("encode response object error",e));
+				className = Exception.class.getName().getBytes();
 				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse()); 
 			}
 			type = RESPONSE;
 		}
-		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + body.length;
+		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + className.length + body.length;
 		ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 		byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
 		byteBuffer.writeByte((byte)TYPE.intValue());
@@ -93,7 +99,9 @@ public class SimpleProcessorProtocol implements Protocol{
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeInt(id);
 		byteBuffer.writeInt(timeout);
+		byteBuffer.writeInt(className.length);
 		byteBuffer.writeInt(body.length);
+		byteBuffer.writeBytes(className);
 		byteBuffer.writeBytes(body);
 		return byteBuffer;
 	}
@@ -119,20 +127,29 @@ public class SimpleProcessorProtocol implements Protocol{
     		wrapper.readByte();
     		int requestId = wrapper.readInt();
     		int timeout = wrapper.readInt();
-    		int expectedLen = wrapper.readInt();
-    		if(wrapper.readableBytes() < expectedLen){
+    		int classNameLen = wrapper.readInt();
+    		int bodyLen = wrapper.readInt();
+    		if(wrapper.readableBytes() < classNameLen + bodyLen){
     			wrapper.setReaderIndex(originPos);
     			return errorObject;
     		}
-    		byte[] body = new byte[expectedLen];
+    		byte[] classNameByte = new byte[classNameLen];
+    		wrapper.readBytes(classNameByte);
+    		String className = new String(classNameByte);
+    		byte[] body = new byte[bodyLen];
     		wrapper.readBytes(body);
+    		int messageLen = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + classNameLen + bodyLen;
         	if(type == REQUEST){
         		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId,codecType, TYPE);
+        		requestWrapper.setMessageLen(messageLen);
+        		requestWrapper.setArgTypes(new String[]{className});
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
         		ResponseWrapper responseWrapper = new ResponseWrapper(requestId,codecType,TYPE);
             	responseWrapper.setResponse(body);
+            	responseWrapper.setMessageLen(messageLen);
+            	responseWrapper.setResponseClassName(className);
 	        	return responseWrapper;
         	}
         	else{

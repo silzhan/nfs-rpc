@@ -5,6 +5,9 @@ package code.google.nfs.rpc.server;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -20,17 +23,17 @@ public class SimpleProcessorServerHandler implements ServerHandler{
 
 	private static final Log LOGGER = LogFactory.getLog(SimpleProcessorServerHandler.class);
 	
-	private ServerProcessor processor = null;
+	private Map<String, ServerProcessor> processors = new ConcurrentHashMap<String, ServerProcessor>();
 	
 	public void registerProcessor(String instanceName,Object instance){
-		processor = (ServerProcessor) instance;
+		processors.put(instanceName, (ServerProcessor)instance);
 	}
 	
 	public ResponseWrapper handleRequest(final RequestWrapper request){
 		ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(),request.getCodecType(),request.getProtocolType());
 		try{
-			Object requestObject = Codecs.getDecoder(request.getCodecType()).decode((byte[])request.getMessage());
-			responseWrapper.setResponse(processor.handle(requestObject));
+			Object requestObject = Codecs.getDecoder(request.getCodecType()).decode(request.getArgTypes()[0],(byte[])request.getMessage());
+			responseWrapper.setResponse(processors.get(requestObject.getClass().getName()).handle(requestObject));
 		}
 		catch(Exception e){
 			LOGGER.error("server direct call handler to handle request error",e);

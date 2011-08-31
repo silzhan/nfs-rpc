@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
+import code.google.nfs.rpc.Codecs;
+import code.google.nfs.rpc.protocol.PBCoders;
+
 /**
  * Abstract benchmark client,test for difference scenes
  * 
@@ -108,6 +111,11 @@ public abstract class AbstractBenchmarkClient {
 		startInfo.append(" bytes,the benchmark will end at:").append(
 				dateFormat.format(calendar.getTime()));
 		System.out.println(startInfo.toString());
+		
+		if(codectype == Codecs.PB_CODEC){
+			PBCoders.add(PB.RequestObject.class.getName(), new PBBenchmarkRequestCodec());
+			PBCoders.add(PB.ResponseObject.class.getName(), new PBBenchmarkResponseCodec());
+		}
 
 		CyclicBarrier barrier = new CyclicBarrier(concurrents);
 		CountDownLatch latch = new CountDownLatch(concurrents);

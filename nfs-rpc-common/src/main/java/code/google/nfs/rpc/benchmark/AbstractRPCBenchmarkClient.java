@@ -31,7 +31,7 @@ public abstract class AbstractRPCBenchmarkClient extends AbstractBenchmarkClient
 		servers.add(new InetSocketAddress(targetIP, targetPort));
 		return new RPCBenchmarkClientRunnable(
 				getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts, codecType, RPCProtocol.TYPE), 
-				requestSize, barrier, latch, startTime, endTime);
+				requestSize, barrier, latch, startTime, endTime, codecType);
 	}
 	
 	/*

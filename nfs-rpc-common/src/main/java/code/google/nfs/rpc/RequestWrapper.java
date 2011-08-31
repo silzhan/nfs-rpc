@@ -21,7 +21,7 @@ public class RequestWrapper {
 	private String methodName;
 	
 	private String[] argTypes;
-	
+
 	private Object[] requestObjects = null;
 	
 	private Object message = null;
@@ -34,6 +34,8 @@ public class RequestWrapper {
 	
 	private Integer codecType = Codecs.HESSIAN_CODEC;
 	
+	private int messageLen;
+
 	public RequestWrapper(Object message,int timeout,Integer codecType,Integer protocolType){
 		this(message,timeout,incId.incrementAndGet(),codecType,protocolType);
 	}
@@ -62,6 +64,18 @@ public class RequestWrapper {
 		this.protocolType = protocolType;
 	}
 
+	public int getMessageLen() {
+		return messageLen;
+	}
+
+	public void setMessageLen(int messageLen) {
+		this.messageLen = messageLen;
+	}
+	
+	public void setArgTypes(String[] argTypes) {
+		this.argTypes = argTypes;
+	}
+	
 	public Integer getProtocolType() {
 		return protocolType;
 	}

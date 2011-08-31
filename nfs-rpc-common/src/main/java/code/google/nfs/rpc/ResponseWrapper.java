@@ -25,10 +25,22 @@ public class ResponseWrapper {
 	
 	private Integer protocolType;
 	
+	private int messageLen;
+	
+	private String responseClassName;
+
 	public ResponseWrapper(Integer requestId,Integer codecType,Integer protocolType){
 		this.requestId = requestId;
 		this.codecType = codecType;
 		this.protocolType = protocolType;
+	}
+	
+	public int getMessageLen() {
+		return messageLen;
+	}
+
+	public void setMessageLen(int messageLen) {
+		this.messageLen = messageLen;
 	}
 
 	public Integer getProtocolType() {
@@ -62,6 +74,14 @@ public class ResponseWrapper {
 	public void setException(Throwable exception) {
 		this.exception = exception;
 		isError = true;
+	}
+	
+	public String getResponseClassName() {
+		return responseClassName;
+	}
+
+	public void setResponseClassName(String responseClassName) {
+		this.responseClassName = responseClassName;
 	}
 	
 }
