@@ -88,6 +88,7 @@ public class SimpleProcessorProtocol implements Protocol{
 			type = RESPONSE;
 		}
 		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + className.length + body.length;
+//		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN  + body.length;
 		ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 		byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
 		byteBuffer.writeByte((byte)TYPE.intValue());
@@ -129,7 +130,7 @@ public class SimpleProcessorProtocol implements Protocol{
     		int timeout = wrapper.readInt();
     		int classNameLen = wrapper.readInt();
     		int bodyLen = wrapper.readInt();
-    		if(wrapper.readableBytes() < classNameLen + bodyLen){
+    		if(wrapper.readableBytes() < bodyLen + classNameLen){
     			wrapper.setReaderIndex(originPos);
     			return errorObject;
     		}
@@ -139,6 +140,7 @@ public class SimpleProcessorProtocol implements Protocol{
     		byte[] body = new byte[bodyLen];
     		wrapper.readBytes(body);
     		int messageLen = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + classNameLen + bodyLen;
+//    		int messageLen = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + bodyLen;
         	if(type == REQUEST){
         		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId,codecType, TYPE);
         		requestWrapper.setMessageLen(messageLen);

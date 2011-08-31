@@ -90,16 +90,18 @@ public class RPCBenchmarkClientRunnable implements ClientRunnable {
 		catch (Exception e) {
 			// IGNORE
 		}
+		if(codecType == Codecs.PB_CODEC){
+			runPB();
+		}
+		else{
+			runJavaAndHessian();
+		}
+		latch.countDown();
+	}
+	
+	private void runJavaAndHessian(){
 		while (running) {
-			Object requestObject = null;
-			if(codecType == Codecs.PB_CODEC){
-				code.google.nfs.rpc.benchmark.PB.RequestObject.Builder objectBuilder = PB.RequestObject.newBuilder();
-				objectBuilder.setBytesObject(ByteString.copyFrom(new byte[requestSize]));
-				requestObject = objectBuilder.build();
-			}
-			else{
-				requestObject = new RequestObject(requestSize);
-			}
+			Object requestObject = new RequestObject(requestSize);
 			long beginTime = System.currentTimeMillis();
 			if (beginTime >= endTime) {
 				running = false;
@@ -118,27 +120,14 @@ public class RPCBenchmarkClientRunnable implements ClientRunnable {
 					// IGNORE
 					continue;
 				}
-				if(codecType == Codecs.PB_CODEC){
-					if(((PB.ResponseObject)response).getBytesObject().toByteArray().length > 0 ){
-						tps[range] = tps[range] + 1;
-						responseTimes[range] = responseTimes[range] + consumeTime;
-					}
-					else{
-						LOGGER.error("server return response is null");
-						errorTPS[range] = errorTPS[range] + 1;
-						errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
-					}
+				if(((ResponseObject)response).getBytes() !=null ){
+					tps[range] = tps[range] + 1;
+					responseTimes[range] = responseTimes[range] + consumeTime;
 				}
 				else{
-					if(((ResponseObject)response).getBytes() !=null ){
-						tps[range] = tps[range] + 1;
-						responseTimes[range] = responseTimes[range] + consumeTime;
-					}
-					else{
-						LOGGER.error("server return response is null");
-						errorTPS[range] = errorTPS[range] + 1;
-						errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
-					}
+					LOGGER.error("server return response is null");
+					errorTPS[range] = errorTPS[range] + 1;
+					errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
 				}
 			} 
 			catch (Exception e) {
@@ -158,7 +147,58 @@ public class RPCBenchmarkClientRunnable implements ClientRunnable {
 				errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
 			}
 		}
-		latch.countDown();
+	}
+	
+	private void runPB(){
+		while (running) {
+			code.google.nfs.rpc.benchmark.PB.RequestObject.Builder objectBuilder = PB.RequestObject.newBuilder();
+			objectBuilder.setBytesObject(ByteString.copyFrom(new byte[requestSize]));
+			Object requestObject = objectBuilder.build();
+			long beginTime = System.currentTimeMillis();
+			if (beginTime >= endTime) {
+				running = false;
+				break;
+			}
+			try {
+				Object response = testService.execute(requestObject);
+				long currentTime = System.currentTimeMillis();
+				if(beginTime <= startTime){
+					continue;
+				}
+				long consumeTime = currentTime - beginTime;
+				sumResponseTimeSpread(consumeTime);
+				int range = Integer.parseInt(String.valueOf(beginTime - startTime))/1000;
+				if(range >= maxRange){
+					// IGNORE
+					continue;
+				}
+				if(((PB.ResponseObject)response).getBytesObject().toByteArray().length > 0 ){
+					tps[range] = tps[range] + 1;
+					responseTimes[range] = responseTimes[range] + consumeTime;
+				}
+				else{
+					LOGGER.error("server return response is null");
+					errorTPS[range] = errorTPS[range] + 1;
+					errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
+				}
+			} 
+			catch (Exception e) {
+				LOGGER.error("testService.execute error",e);
+				long currentTime = System.currentTimeMillis();
+				if(beginTime <= startTime){
+					continue;
+				}
+				long consumeTime = currentTime - beginTime;
+				sumResponseTimeSpread(consumeTime);
+				int range = Integer.parseInt(String.valueOf(beginTime - startTime))/1000;	
+				if(range >= maxRange){
+					// IGNORE
+					continue;
+				}
+				errorTPS[range] = errorTPS[range] + 1;
+				errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
+			}
+		}
 	}
 	
 	public List<long[]> getResults() {
