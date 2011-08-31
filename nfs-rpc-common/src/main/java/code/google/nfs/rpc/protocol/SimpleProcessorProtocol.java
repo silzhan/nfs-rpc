@@ -63,7 +63,8 @@ public class SimpleProcessorProtocol implements Protocol{
 				body = Codecs.getEncoder(codecType).encode(wrapper.getMessage()); 
 				id = wrapper.getId();
 				timeout = wrapper.getTimeout();
-				className = wrapper.getMessage().getClass().getName().getBytes();
+				if(codecType == Codecs.PB_CODEC)
+					className = wrapper.getMessage().getClass().getName().getBytes();
 			}
 			catch(Exception e){
 				LOGGER.error("encode request object error",e);
@@ -76,19 +77,24 @@ public class SimpleProcessorProtocol implements Protocol{
 				codecType = wrapper.getCodecType();
 				body = Codecs.getEncoder(codecType).encode(wrapper.getResponse()); 
 				id = wrapper.getRequestId();
-				className = wrapper.getResponse().getClass().getName().getBytes();
+				if(codecType == Codecs.PB_CODEC)
+					className = wrapper.getResponse().getClass().getName().getBytes();
 			}
 			catch(Exception e){
 				LOGGER.error("encode response object error",e);
 				// still create response,so client can get it
 				wrapper.setResponse(new Exception("encode response object error",e));
-				className = Exception.class.getName().getBytes();
+				if(codecType == Codecs.PB_CODEC)
+					className = Exception.class.getName().getBytes();
 				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse()); 
 			}
 			type = RESPONSE;
 		}
-		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + className.length + body.length;
-//		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN  + body.length;
+//		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + className.length + body.length;
+		int capacity = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN  + body.length;
+		if(codecType == Codecs.PB_CODEC){
+			capacity += className.length;
+		}
 		ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 		byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
 		byteBuffer.writeByte((byte)TYPE.intValue());
@@ -100,9 +106,15 @@ public class SimpleProcessorProtocol implements Protocol{
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeInt(id);
 		byteBuffer.writeInt(timeout);
-		byteBuffer.writeInt(className.length);
+		if(codecType == Codecs.PB_CODEC){
+			byteBuffer.writeInt(className.length);
+		}
+		else{
+			byteBuffer.writeInt(0);
+		}
 		byteBuffer.writeInt(body.length);
-		byteBuffer.writeBytes(className);
+		if(codecType == Codecs.PB_CODEC)
+			byteBuffer.writeBytes(className);
 		byteBuffer.writeBytes(body);
 		return byteBuffer;
 	}
@@ -134,9 +146,12 @@ public class SimpleProcessorProtocol implements Protocol{
     			wrapper.setReaderIndex(originPos);
     			return errorObject;
     		}
-    		byte[] classNameByte = new byte[classNameLen];
-    		wrapper.readBytes(classNameByte);
-    		String className = new String(classNameByte);
+    		String className = "";
+    		if(codecType == Codecs.PB_CODEC){
+	    		byte[] classNameByte = new byte[classNameLen];
+	    		wrapper.readBytes(classNameByte);
+		    	className = new String(classNameByte);
+    		}
     		byte[] body = new byte[bodyLen];
     		wrapper.readBytes(body);
     		int messageLen = ProtocolUtils.HEADER_LEN + CUSTOMPROTOCOL_HEADER_LEN + classNameLen + bodyLen;
