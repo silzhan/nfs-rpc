@@ -59,7 +59,9 @@ import code.google.nfs.rpc.ResponseWrapper;
  *  KEEPED(1B):    
  *  KEEPED(1B):    
  *  ID(4B):        request id
+ *  BodyClassNameLen(4B): body className Len
  *  LENGTH(4B):    body length
+ *  BodyClassName
  *  BODY
  *  
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
@@ -72,7 +74,7 @@ public class RPCProtocol implements Protocol {
 	
 	private static final int REQUEST_HEADER_LEN = 1 * 6 + 5 * 4;
 	
-	private static final int RESPONSE_HEADER_LEN = 1 * 6 + 2 * 4;
+	private static final int RESPONSE_HEADER_LEN = 1 * 6 + 3 * 4;
 	
 	private static final byte VERSION = (byte)1;
 	
@@ -148,7 +150,9 @@ public class RPCProtocol implements Protocol {
 		else{
 			ResponseWrapper wrapper = (ResponseWrapper) message;
 			byte[] body = null;
+			byte[] className = null;
 			try{
+				className = wrapper.getResponse().getClass().getName().getBytes();
 				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
 				id = wrapper.getRequestId();
 			}
@@ -156,10 +160,11 @@ public class RPCProtocol implements Protocol {
 				LOGGER.error("encode response object error", e);
 				// still create responsewrapper,so client can get exception
 				wrapper.setResponse(new Exception("serialize response object error",e));
+				className = Exception.class.getName().getBytes();
 				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
 			}
 			type = RESPONSE;
-			int capacity = ProtocolUtils.HEADER_LEN + RESPONSE_HEADER_LEN + body.length;
+			int capacity = ProtocolUtils.HEADER_LEN + RESPONSE_HEADER_LEN + className.length + body.length;
 			ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 			byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
 			byteBuffer.writeByte((byte)TYPE.intValue());
@@ -170,7 +175,9 @@ public class RPCProtocol implements Protocol {
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeInt(id);
+			byteBuffer.writeInt(className.length);
 			byteBuffer.writeInt(body.length);
+			byteBuffer.writeBytes(className);
 			byteBuffer.writeBytes(body);
 			return byteBuffer;
 		}
@@ -206,12 +213,12 @@ public class RPCProtocol implements Protocol {
         		int methodNameLen = wrapper.readInt();
         		int argsCount = wrapper.readInt();
         		int argInfosLen = argsCount * 4 * 2;
-        		int expectedLen = argInfosLen + targetInstanceLen + methodNameLen;
-        		if(wrapper.readableBytes() < expectedLen){
+        		int expectedLenInfoLen = argInfosLen + targetInstanceLen + methodNameLen;
+        		if(wrapper.readableBytes() < expectedLenInfoLen){
         			wrapper.setReaderIndex(originPos);
         			return errorObject;
         		}
-        		expectedLen = 0;
+        		int expectedLen = 0;
         		int[] argsTypeLen = new int[argsCount];
         		for (int i = 0; i < argsCount; i++) {
 					argsTypeLen[i] = wrapper.readInt();
@@ -246,6 +253,8 @@ public class RPCProtocol implements Protocol {
 				}
         		RequestWrapper requestWrapper = new RequestWrapper(targetInstanceName, methodName, 
         														   argTypes, args, timeout, requestId, codecType, TYPE);
+        		int messageLen = ProtocolUtils.HEADER_LEN + REQUEST_HEADER_LEN + expectedLenInfoLen + expectedLen;
+        		requestWrapper.setMessageLen(messageLen);
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
@@ -258,16 +267,23 @@ public class RPCProtocol implements Protocol {
         		wrapper.readByte();
         		wrapper.readByte();
             	int requestId = wrapper.readInt();
+            	int classNameLen = wrapper.readInt();
             	int bodyLen = wrapper.readInt();
-            	if(wrapper.readableBytes() < bodyLen){
+            	if(wrapper.readableBytes() < classNameLen + bodyLen){
             		wrapper.setReaderIndex(originPos);
             		return errorObject;
             	}
+            	byte[] classNameBytes = new byte[classNameLen];
+            	wrapper.readBytes(classNameBytes);
+            	String className = new String(classNameBytes);
             	byte[] bodyBytes = new byte[bodyLen];
             	wrapper.readBytes(bodyBytes);
             	ResponseWrapper responseWrapper = new ResponseWrapper(requestId,codecType,TYPE);
             	responseWrapper.setResponse(bodyBytes);
-	        	return responseWrapper;
+            	responseWrapper.setResponseClassName(className);
+	        	int messageLen = ProtocolUtils.HEADER_LEN + RESPONSE_HEADER_LEN + classNameLen + bodyLen;
+	        	responseWrapper.setMessageLen(messageLen);
+            	return responseWrapper;
         	}
         	else{
         		throw new UnsupportedOperationException("protocol type : "+type+" is not supported!");

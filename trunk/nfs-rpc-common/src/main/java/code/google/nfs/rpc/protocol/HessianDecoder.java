@@ -14,10 +14,11 @@ import com.caucho.hessian.io.Hessian2Input;
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
 public class HessianDecoder implements Decoder {
-
-	public Object decode(byte[] bytes) throws Exception {
+	
+	public Object decode(String className,byte[] bytes) throws Exception {
 		Hessian2Input input = new Hessian2Input(new ByteArrayInputStream(bytes));
-		Object resultObject = input.readObject();
+		// avoid child object to parent object problem
+		Object resultObject = input.readObject(Class.forName(className));
 		input.close();
 		return resultObject;
 	}

@@ -13,6 +13,9 @@ import java.util.concurrent.CyclicBarrier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.protobuf.ByteString;
+
+import code.google.nfs.rpc.Codecs;
 import code.google.nfs.rpc.client.ClientFactory;
 import code.google.nfs.rpc.protocol.SimpleProcessorProtocol;
 /**
@@ -103,15 +106,25 @@ public class SimpleProcessorBenchmarkClientRunnable implements ClientRunnable {
 			// IGNORE
 		}
 		while (running) {
+			Object requestObject = null;
+			if(codecType == Codecs.PB_CODEC){
+				code.google.nfs.rpc.benchmark.PB.RequestObject.Builder objectBuilder = PB.RequestObject.newBuilder();
+				objectBuilder.setBytesObject(ByteString.copyFrom(new byte[requestSize]));
+				requestObject = objectBuilder.build();
+			}
+			else{
+				requestObject = new RequestObject(requestSize);
+			}
 			long beginTime = System.currentTimeMillis();
 			if (beginTime >= endTime) {
 				running = false;
 				break;
 			}
 			try {
-				ResponseObject response = (ResponseObject) factory.get(
-						targetIP, targetPort, 1000, clientNums).invokeSync(
-						new RequestObject(requestSize), rpcTimeout, codecType, SimpleProcessorProtocol.TYPE);
+				Object response = null;
+				response = factory.get(
+						targetIP, targetPort, 1000, clientNums).invokeSync(requestObject
+						, rpcTimeout, codecType, SimpleProcessorProtocol.TYPE);
 				long currentTime = System.currentTimeMillis();
 				if(beginTime <= startTime){
 					continue;
@@ -123,14 +136,27 @@ public class SimpleProcessorBenchmarkClientRunnable implements ClientRunnable {
 					System.err.println("benchmark range exceeds maxRange,range is: "+range+",maxRange is: "+maxRange);
 					continue;
 				}
-				if(response.getBytes() !=null ){
-					tps[range] = tps[range] + 1;
-					responseTimes[range] = responseTimes[range] + consumeTime;
+				if(codecType == Codecs.PB_CODEC){
+					if(((PB.ResponseObject)response).getBytesObject().toByteArray().length > 0 ){
+						tps[range] = tps[range] + 1;
+						responseTimes[range] = responseTimes[range] + consumeTime;
+					}
+					else{
+						LOGGER.error("server return response is null");
+						errorTPS[range] = errorTPS[range] + 1;
+						errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
+					}
 				}
 				else{
-					LOGGER.error("server return response is null");
-					errorTPS[range] = errorTPS[range] + 1;
-					errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
+					if(((ResponseObject)response).getBytes() !=null ){
+						tps[range] = tps[range] + 1;
+						responseTimes[range] = responseTimes[range] + consumeTime;
+					}
+					else{
+						LOGGER.error("server return response is null");
+						errorTPS[range] = errorTPS[range] + 1;
+						errorResponseTimes[range] = errorResponseTimes[range] + consumeTime;
+					}
 				}
 			} 
 			catch (Exception e) {

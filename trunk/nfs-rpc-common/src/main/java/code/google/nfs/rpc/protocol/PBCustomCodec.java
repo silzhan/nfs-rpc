@@ -6,15 +6,14 @@
  */
 package code.google.nfs.rpc.protocol;
 /**
- * Decoder Interface
+ * ProtocolBuf Custom Codec
  * 
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
-public interface Decoder {
+public interface PBCustomCodec {
 
-	/**
-	 * decode byte[] to Object
-	 */
-	public Object decode(String className,byte[] bytes) throws Exception;
+	public Object decode(byte[] bytes) throws Exception;
+	
+	public byte[] encode(Object object) throws Exception;
 	
 }

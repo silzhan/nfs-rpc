@@ -14,7 +14,7 @@ import java.io.ObjectInputStream;
  */
 public class JavaDecoder implements Decoder{
 
-	public Object decode(byte[] bytes) throws Exception {
+	public Object decode(String className,byte[] bytes) throws Exception {
 		ObjectInputStream objectIn = new ObjectInputStream(new ByteArrayInputStream(bytes));
 		Object resultObject = objectIn.readObject();
 		objectIn.close();

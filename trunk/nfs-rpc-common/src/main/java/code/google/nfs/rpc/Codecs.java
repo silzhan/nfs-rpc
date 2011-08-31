@@ -14,6 +14,8 @@ import code.google.nfs.rpc.protocol.HessianDecoder;
 import code.google.nfs.rpc.protocol.HessianEncoder;
 import code.google.nfs.rpc.protocol.JavaDecoder;
 import code.google.nfs.rpc.protocol.JavaEncoder;
+import code.google.nfs.rpc.protocol.PBDecoder;
+import code.google.nfs.rpc.protocol.PBEncoder;
 /**
  * Encoder & Decoder Register
  * 
@@ -25,6 +27,8 @@ public class Codecs {
 	
 	public static final Integer HESSIAN_CODEC = 2;
 	
+	public static final Integer PB_CODEC = 3;
+	
 	private static Map<Integer, Encoder> encoders = new ConcurrentHashMap<Integer, Encoder>();
 	
 	private static Map<Integer, Decoder> decoders = new ConcurrentHashMap<Integer, Decoder>();
@@ -32,8 +36,10 @@ public class Codecs {
 	static{
 		addEncoder(JAVA_CODEC, new JavaEncoder());
 		addEncoder(HESSIAN_CODEC, new HessianEncoder());
+		addEncoder(PB_CODEC, new PBEncoder());
 		addDecoder(JAVA_CODEC, new JavaDecoder());
 		addDecoder(HESSIAN_CODEC, new HessianDecoder());
+		addDecoder(PB_CODEC, new PBDecoder());
 	}
 	
 	public static void addEncoder(Integer encoderKey,Encoder encoder){
