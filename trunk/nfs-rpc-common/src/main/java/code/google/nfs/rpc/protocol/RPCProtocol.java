@@ -62,7 +62,7 @@ import code.google.nfs.rpc.ResponseWrapper;
  *  BodyClassNameLen(4B): body className Len
  *  LENGTH(4B):    body length
  *  BodyClassName
- *  BODY
+ *  BODY if need than set
  *  
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
@@ -164,7 +164,10 @@ public class RPCProtocol implements Protocol {
 				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
 			}
 			type = RESPONSE;
-			int capacity = ProtocolUtils.HEADER_LEN + RESPONSE_HEADER_LEN + className.length + body.length;
+			int capacity = ProtocolUtils.HEADER_LEN + RESPONSE_HEADER_LEN + body.length;
+			if(wrapper.getCodecType() == Codecs.PB_CODEC){
+				capacity += className.length;
+			}
 			ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 			byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
 			byteBuffer.writeByte((byte)TYPE.intValue());
@@ -175,9 +178,16 @@ public class RPCProtocol implements Protocol {
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeInt(id);
-			byteBuffer.writeInt(className.length);
+			if(wrapper.getCodecType() == Codecs.PB_CODEC){
+				byteBuffer.writeInt(0);
+			}
+			else{
+				byteBuffer.writeInt(className.length);
+			}
 			byteBuffer.writeInt(body.length);
-			byteBuffer.writeBytes(className);
+			if(wrapper.getCodecType() == Codecs.PB_CODEC){
+				byteBuffer.writeBytes(className);
+			}
 			byteBuffer.writeBytes(body);
 			return byteBuffer;
 		}
@@ -273,9 +283,12 @@ public class RPCProtocol implements Protocol {
             		wrapper.setReaderIndex(originPos);
             		return errorObject;
             	}
-            	byte[] classNameBytes = new byte[classNameLen];
-            	wrapper.readBytes(classNameBytes);
-            	String className = new String(classNameBytes);
+            	String className = "";
+            	if(codecType == Codecs.PB_CODEC){
+	            	byte[] classNameBytes = new byte[classNameLen];
+	            	wrapper.readBytes(classNameBytes);
+	            	className = new String(classNameBytes);
+            	}
             	byte[] bodyBytes = new byte[bodyLen];
             	wrapper.readBytes(bodyBytes);
             	ResponseWrapper responseWrapper = new ResponseWrapper(requestId,codecType,TYPE);
