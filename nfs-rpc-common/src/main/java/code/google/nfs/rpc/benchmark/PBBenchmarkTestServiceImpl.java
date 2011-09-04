@@ -6,23 +6,26 @@
  */
 package code.google.nfs.rpc.benchmark;
 
+import com.google.protobuf.ByteString;
 
 /**
  * Just for Reflection RPC Benchmark
  * 
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
-public class BenchmarkTestServiceImpl implements BenchmarkTestService {
+public class PBBenchmarkTestServiceImpl implements BenchmarkTestService {
 
 	private int responseSize;
 	
-	public BenchmarkTestServiceImpl(int responseSize){
+	public PBBenchmarkTestServiceImpl(int responseSize){
 		this.responseSize = responseSize;
 	}
 	
 	// support java/hessian/pb codec
 	public Object execute(Object request) {
-		return new ResponseObject(responseSize);
+		PB.ResponseObject.Builder  builder = PB.ResponseObject.newBuilder();
+		builder.setBytesObject(ByteString.copyFrom(new byte[responseSize]));
+		return builder.build();
 	}
 
 }
