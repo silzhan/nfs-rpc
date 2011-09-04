@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
+import code.google.nfs.rpc.Codecs;
 import code.google.nfs.rpc.protocol.RPCProtocol;
 
 /**
@@ -29,8 +30,12 @@ public abstract class AbstractRPCBenchmarkClient extends AbstractBenchmarkClient
 		methodTimeouts.put("*", rpcTimeout);
 		List<InetSocketAddress> servers = new ArrayList<InetSocketAddress>();
 		servers.add(new InetSocketAddress(targetIP, targetPort));
+		String serviceName = "testservice";
+		if(codecType == Codecs.PB_CODEC){
+			serviceName = "testservicepb";
+		}
 		return new RPCBenchmarkClientRunnable(
-				getProxyInstance(servers, clientNums, 1000, "testservice",methodTimeouts, codecType, RPCProtocol.TYPE), 
+				getProxyInstance(servers, clientNums, 1000, serviceName,methodTimeouts, codecType, RPCProtocol.TYPE), 
 				requestSize, barrier, latch, startTime, endTime, codecType);
 	}
 	

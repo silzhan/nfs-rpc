@@ -65,6 +65,7 @@ public abstract class AbstractBenchmarkServer {
 			}
 		});
 		server.registerProcessor(RPCProtocol.TYPE, "testservice", new BenchmarkTestServiceImpl(responseSize));
+		server.registerProcessor(RPCProtocol.TYPE, "testservicepb", new PBBenchmarkTestServiceImpl(responseSize));
 		ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
 		ExecutorService threadPool = new ThreadPoolExecutor(20, maxThreads,
 				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);
