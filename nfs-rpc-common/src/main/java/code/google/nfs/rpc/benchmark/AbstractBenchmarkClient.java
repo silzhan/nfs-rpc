@@ -18,7 +18,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
 import code.google.nfs.rpc.Codecs;
-import code.google.nfs.rpc.protocol.PBCoders;
+import code.google.nfs.rpc.protocol.PBDecoder;
 
 /**
  * Abstract benchmark client,test for difference scenes
@@ -113,8 +113,8 @@ public abstract class AbstractBenchmarkClient {
 		System.out.println(startInfo.toString());
 		
 		if(codectype == Codecs.PB_CODEC){
-			PBCoders.add(PB.RequestObject.class.getName(), new PBBenchmarkRequestCodec());
-			PBCoders.add(PB.ResponseObject.class.getName(), new PBBenchmarkResponseCodec());
+			PBDecoder.addMessage(PB.RequestObject.class.getName(), PB.RequestObject.getDefaultInstance());
+			PBDecoder.addMessage(PB.ResponseObject.class.getName(), PB.ResponseObject.getDefaultInstance());
 		}
 
 		CyclicBarrier barrier = new CyclicBarrier(concurrents);
