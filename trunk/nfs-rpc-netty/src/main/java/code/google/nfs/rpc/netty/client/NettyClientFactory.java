@@ -37,8 +37,8 @@ public class NettyClientFactory extends AbstractClientFactory {
 		bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
 										Executors.newCachedThreadPool(bossThreadFactory),
 										Executors.newCachedThreadPool(workerThreadFactory)));
-		bootstrap.setOption("tcpNoDelay", true);
-		bootstrap.setOption("reuseAddress", true);
+		bootstrap.setOption("tcpNoDelay", Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
+		bootstrap.setOption("reuseAddress", Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.reuseaddress", "true")));
 	}
 	
 	public static AbstractClientFactory getInstance() {
