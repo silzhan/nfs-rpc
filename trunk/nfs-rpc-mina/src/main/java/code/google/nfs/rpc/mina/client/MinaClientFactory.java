@@ -67,7 +67,7 @@ public class MinaClientFactory extends AbstractClientFactory {
 		} else {
 			cfg.setConnectTimeout(1);
 		}
-		cfg.getSessionConfig().setTcpNoDelay(true);
+		cfg.getSessionConfig().setTcpNoDelay(Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
 		cfg.getFilterChain().addLast("objectserialize",new MinaProtocolCodecFilter());
 		SocketAddress targetAddress = new InetSocketAddress(targetIP,targetPort);
 		MinaClientProcessor processor = new MinaClientProcessor(this, key);
