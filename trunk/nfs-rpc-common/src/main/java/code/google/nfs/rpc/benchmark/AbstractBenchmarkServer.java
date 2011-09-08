@@ -13,14 +13,14 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.google.protobuf.ByteString;
-
 import code.google.nfs.rpc.NamedThreadFactory;
-import code.google.nfs.rpc.protocol.PBCoders;
+import code.google.nfs.rpc.protocol.PBDecoder;
 import code.google.nfs.rpc.protocol.RPCProtocol;
 import code.google.nfs.rpc.protocol.SimpleProcessorProtocol;
 import code.google.nfs.rpc.server.Server;
 import code.google.nfs.rpc.server.ServerProcessor;
+
+import com.google.protobuf.ByteString;
 
 
 /**
@@ -55,8 +55,8 @@ public abstract class AbstractBenchmarkServer {
 			}
 		});
 		// for pb codec
-		PBCoders.add(PB.RequestObject.class.getName(), new PBBenchmarkRequestCodec());
-		PBCoders.add(PB.ResponseObject.class.getName(), new PBBenchmarkResponseCodec());
+		PBDecoder.addMessage(PB.RequestObject.class.getName(), PB.RequestObject.getDefaultInstance());
+		PBDecoder.addMessage(PB.ResponseObject.class.getName(), PB.ResponseObject.getDefaultInstance());
 		server.registerProcessor(SimpleProcessorProtocol.TYPE,PB.RequestObject.class.getName(), new ServerProcessor() {
 			public Object handle(Object request) throws Exception {
 				PB.ResponseObject.Builder  builder = PB.ResponseObject.newBuilder();
