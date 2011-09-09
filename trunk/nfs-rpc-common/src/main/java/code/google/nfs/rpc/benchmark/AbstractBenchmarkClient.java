@@ -135,7 +135,6 @@ public abstract class AbstractBenchmarkClient {
 
 		// read results & add all
 		// key: runtime second range value: Long[2] array Long[0]: execute count Long[1]: response time sum
-		int maxTimeRange = runtime;
 		Map<String, Long[]> times = new HashMap<String, Long[]>();
 		Map<String, Long[]> errorTimes = new HashMap<String, Long[]>();
 		for (ClientRunnable runnable : runnables) {
@@ -181,6 +180,7 @@ public abstract class AbstractBenchmarkClient {
 
 		long ignoreRequest = 0;
 		long ignoreErrorRequest = 0;
+		int maxTimeRange = runtime - 30;
 		// ignore the last 10 second requests,so tps can count more accurate
 		for (int i = 0; i < 10; i++) {
 			Long[] values = times.remove(String.valueOf(maxTimeRange - i));
