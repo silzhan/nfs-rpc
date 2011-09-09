@@ -48,7 +48,6 @@ public class GrizzlyServerHandler extends BaseFilter {
 	}
 	
 	public NextAction handleClose(FilterChainContext ctx) throws IOException {
-		System.err.println("session closed");
 		return super.handleClose(ctx);
 	}
 	
@@ -59,77 +58,40 @@ public class GrizzlyServerHandler extends BaseFilter {
 	
 	@SuppressWarnings("rawtypes")
 	private void handleOneRequest(final FilterChainContext ctx, final RequestWrapper request) {
-//		try {
-//			threadpool.execute(new Runnable() {
-//				public void run() {
-					long beginTime = System.currentTimeMillis();
-					ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler(request.getProtocolType()).handleRequest(request);
-					int consumeTime = Integer.parseInt(""+ (System.currentTimeMillis() - beginTime));
-					// already timeout,so not return
-					if (consumeTime >= request.getTimeout()) {
-						LOGGER.warn("timeout,so give up send response to client,requestId is:"
-								+ request.getId()
-								+ ",client is:"
-								+ ctx.getConnection().toString()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
-						return;
-					}
-					try {
-						ctx.write(responseWrapper, new CompletionHandler<WriteResult>() {
-							
-							public void updated(WriteResult result) {
-								;
-							}
-							
-							public void failed(Throwable t) {
-								LOGGER.error("server write response error",t);
-							}
-							
-							public void completed(WriteResult result) {
-								// IGNORE
-							}
-							
-							public void cancelled() {
-								LOGGER.error("server write response cancelled");
-							}
-						});
-					} 
-					catch (IOException e) {
-						LOGGER.error("server write response error",e);
-					}
-//					ctx.resume();
-//				}
-//			});
-//		} 
-//		catch (RejectedExecutionException exception) {
-//			LOGGER.error("server threadpool full,threadpool maxsize is:"
-//					+ ((ThreadPoolExecutor) threadpool).getMaximumPoolSize());
-//			ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(),request.getCodecType(),request.getProtocolType());
-//			responseWrapper
-//					.setException(new Exception("server threadpool full,maybe because server is slow or too many requests"));
-//			try {
-//				ctx.write(responseWrapper, new CompletionHandler<WriteResult>() {
-//					
-//					public void updated(WriteResult result) {
-//						;
-//					}
-//					
-//					public void failed(Throwable t) {
-//						LOGGER.error("server write response error",t);
-//					}
-//					
-//					public void completed(WriteResult result) {
-//						// IGNORE
-//					}
-//					
-//					public void cancelled() {
-//						LOGGER.error("server write response cancelled");
-//					}
-//				});
-//			} 
-//			catch (IOException e) {
-//				LOGGER.error("server write response error",e);
-//			}
-//		}
+		long beginTime = System.currentTimeMillis();
+		ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler(request.getProtocolType()).handleRequest(request);
+		int consumeTime = Integer.parseInt(""+ (System.currentTimeMillis() - beginTime));
+		// already timeout,so not return
+		if (consumeTime >= request.getTimeout()) {
+			LOGGER.warn("timeout,so give up send response to client,requestId is:"
+					+ request.getId()
+					+ ",client is:"
+					+ ctx.getConnection().toString()+",consumetime is:"+consumeTime+",timeout is:"+request.getTimeout());
+			return;
+		}
+		try {
+			ctx.write(responseWrapper, new CompletionHandler<WriteResult>() {
+				
+				public void updated(WriteResult result) {
+					;
+				}
+				
+				public void failed(Throwable t) {
+					LOGGER.error("server write response error",t);
+				}
+				
+				public void completed(WriteResult result) {
+					// IGNORE
+				}
+				
+				public void cancelled() {
+					LOGGER.error("server write response cancelled");
+				}
+			});
+		} 
+		catch (IOException e) {
+			LOGGER.error("server write response error",e);
+		}
 	}
 	
 }
