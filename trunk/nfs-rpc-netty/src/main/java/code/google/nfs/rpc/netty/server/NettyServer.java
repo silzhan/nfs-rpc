@@ -44,8 +44,8 @@ public class NettyServer implements Server {
 		bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
 				Executors.newCachedThreadPool(serverBossTF),
 				Executors.newCachedThreadPool(serverWorkerTF)));
-		bootstrap.setOption("tcpNoDelay", true);
-		bootstrap.setOption("reuseAddress", true);
+		bootstrap.setOption("tcpNoDelay", Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
+		bootstrap.setOption("reuseAddress", Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.reuseaddress", "true")));
 	}
 
 	public void start(int listenPort, final ExecutorService threadPool) throws Exception {

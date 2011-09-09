@@ -66,6 +66,12 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 		}
 	}
 	
+//	private void handleOneRequestTest(final ChannelHandlerContext ctx, final RequestWrapper request) {
+//		ResponseWrapper response = new ResponseWrapper(request.getId(), request.getCodecType(), request.getProtocolType());
+//		response.setResponse(new ResponseObject(100));
+//		ctx.getChannel().write(response);
+//	}
+	
 	private void handleOneRequest(final ChannelHandlerContext ctx, final RequestWrapper request) {
 		try {
 			threadpool.execute(new HandlerRunnable(ctx, request));
