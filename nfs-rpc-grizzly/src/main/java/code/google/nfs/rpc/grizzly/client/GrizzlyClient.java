@@ -1,4 +1,5 @@
 package code.google.nfs.rpc.grizzly.client;
+
 /**
  * nfs-rpc
  *   Apache License
@@ -10,6 +11,7 @@ import org.glassfish.grizzly.Connection;
 
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.client.AbstractClient;
+
 /**
  * Grizzly Client
  * 
@@ -18,16 +20,12 @@ import code.google.nfs.rpc.client.AbstractClient;
 public class GrizzlyClient extends AbstractClient {
 
 	private String targetIP;
-	
 	private int targetPort;
-	
 	private int connectTimeout;
-	
 	private Connection<Object> connection;
-	
 	private String clientKey;
 	
-	public GrizzlyClient(String targetIP,int targetPort,int connectTimeout,Connection<Object> connection,String clientKey){
+    public GrizzlyClient(String targetIP, int targetPort, int connectTimeout, Connection<Object> connection, String clientKey) {
 		this.targetIP = targetIP;
 		this.targetPort = targetPort;
 		this.connectTimeout = connectTimeout;
@@ -35,13 +33,13 @@ public class GrizzlyClient extends AbstractClient {
 		this.clientKey = clientKey;
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
 	public void sendRequest(RequestWrapper wrapper, int timeout)
 		throws Exception {
+//        System.out.println("sendRequest connection=" + connection + " tp=" + Thread.currentThread());
 		connection.write(wrapper, new CompletionHandler() {
 
 			public void cancelled() {
-				
 			}
 
 			public void failed(Throwable throwable) {
@@ -50,11 +48,9 @@ public class GrizzlyClient extends AbstractClient {
 			}
 
 			public void completed(Object result) {
-				
 			}
 
 			public void updated(Object result) {
-				
 			}
 		});
 	}
@@ -70,5 +66,4 @@ public class GrizzlyClient extends AbstractClient {
 	public int getConnectTimeout() {
 		return connectTimeout;
 	}
-
 }

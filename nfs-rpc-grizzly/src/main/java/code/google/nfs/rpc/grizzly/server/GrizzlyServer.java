@@ -1,11 +1,11 @@
 package code.google.nfs.rpc.grizzly.server;
+
 /**
  * nfs-rpc
  *   Apache License
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -21,6 +21,7 @@ import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import code.google.nfs.rpc.ProtocolFactory;
 import code.google.nfs.rpc.grizzly.serialize.GrizzlyProtocolFilter;
 import code.google.nfs.rpc.server.Server;
+
 /**
  * Grizzly Server
  * 
@@ -29,46 +30,29 @@ import code.google.nfs.rpc.server.Server;
 public class GrizzlyServer implements Server {
 
 	private static final Log LOGGER = LogFactory.getLog(GrizzlyServer.class);
-	
 	private TCPNIOTransport transport = null;
 	
 	public void start(int listenPort, ExecutorService threadpool) throws Exception {
 		FilterChainBuilder filterChainBuilder = FilterChainBuilder.stateless();
 		filterChainBuilder.add(new TransportFilter());
-		filterChainBuilder.add(new GrizzlyProtocolFilter());
+        filterChainBuilder.add(new GrizzlyProtocolFilter(true));
 		filterChainBuilder.add(new GrizzlyServerHandler());
 		TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance();
 		ThreadPoolConfig config = builder.getWorkerThreadPoolConfig();
-		ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor)threadpool;
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) threadpool;
 		config.setCorePoolSize(threadPoolExecutor.getCorePoolSize()).setMaxPoolSize(threadPoolExecutor.getMaximumPoolSize()).setPoolName("GRIZZLY-SERVER");
 		transport = builder.build();
 		transport.setIOStrategy(WorkerThreadIOStrategy.getInstance());
+
 		transport.setProcessor(filterChainBuilder.build());
 		transport.bind(listenPort);
-		final TCPNIOTransport t = transport;
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					t.start();
-				} 
-				catch (IOException e) {
-					e.printStackTrace();
-				}
-				while(true){
-					try {
-						Thread.sleep(Long.MAX_VALUE);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}).start();
-		LOGGER.warn("server started,listen at: "+listenPort);
-	}
+
+        transport.start();
+        LOGGER.warn("server started,listen at: " + listenPort);
+	} 
 	
 	public void stop() throws Exception {
-		if(transport != null){
+        if (transport != null) {
 			transport.stop();
 			LOGGER.warn("server stoped!");
 		}
@@ -77,5 +61,4 @@ public class GrizzlyServer implements Server {
 	public void registerProcessor(Integer protocolType, String serviceName, Object serviceInstance) {
 		ProtocolFactory.getServerHandler(protocolType).registerProcessor(serviceName, serviceInstance);
 	}
-
 }

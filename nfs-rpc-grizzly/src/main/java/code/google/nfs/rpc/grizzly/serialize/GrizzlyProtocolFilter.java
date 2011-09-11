@@ -1,4 +1,5 @@
 package code.google.nfs.rpc.grizzly.serialize;
+
 /**
  * nfs-rpc
  *   Apache License
@@ -12,49 +13,69 @@ import org.apache.commons.logging.LogFactory;
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
+import org.glassfish.grizzly.filterchain.FilterChainEvent;
 import org.glassfish.grizzly.filterchain.NextAction;
 
-import code.google.nfs.rpc.RequestWrapper;
-import code.google.nfs.rpc.ResponseWrapper;
 import code.google.nfs.rpc.protocol.ProtocolUtils;
+import java.util.ArrayList;
+import java.util.List;
+import org.glassfish.grizzly.Grizzly;
+import org.glassfish.grizzly.attributes.Attribute;
+import org.glassfish.grizzly.filterchain.TransportFilter;
+import org.glassfish.grizzly.memory.CompositeBuffer;
 
 /**
  * Grizzly Protocol Decoder
  * 
  * @author <a href="mailto:bluedavy@gmail.com">bluedavy</a>
  */
-public class GrizzlyProtocolFilter extends BaseFilter{
+public class GrizzlyProtocolFilter extends BaseFilter {
 	
 	private static final Log LOGGER = LogFactory.getLog(GrizzlyProtocolFilter.class);
 	
+    private static final Attribute<CompositeBuffer> OUTPUT_BUFFER_ATTR =
+            Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute(
+            "GrizzlyProtocolFilter.outputBuffer");
+    
+    private final boolean isBufferingEnabled;
+
+    public GrizzlyProtocolFilter(boolean isBufferingEnabled) {
+        this.isBufferingEnabled = isBufferingEnabled;
+    }
+        
 	// decode object
 	public NextAction handleRead(FilterChainContext ctx) throws IOException {
-		final Buffer buffer = ctx.getMessage();
-		final int bufferLen = buffer.remaining();
+        final Object message = ctx.getMessage();
+        if (message instanceof IncompleteBufferHolder) {
+            return ctx.getStopAction(((IncompleteBufferHolder) message).buffer);
+        }
+
+        final Buffer buffer = (Buffer) message;
+
+//        final int bufferLen = buffer.remaining();
 		Object errorReturnObject = new Object();
 		GrizzlyByteBufferWrapper wrapper = new GrizzlyByteBufferWrapper(buffer);
+
 		try {
-			Object object = ProtocolUtils.decode(wrapper, errorReturnObject);
-			if(object == errorReturnObject){
+            final List<Object> list = new ArrayList<Object>();
+            Object object;
+            while ((object = ProtocolUtils.decode(wrapper, errorReturnObject))
+                    != errorReturnObject) {
+                list.add(object);
+            }
+
+            if (list.isEmpty()) {
 				return ctx.getStopAction(buffer);
+            } else {
+                final Buffer remainder = buffer.hasRemaining()
+                        ? buffer.split(buffer.position()) : null;
+                buffer.dispose();
+
+                ctx.setMessage(list);
+                return ctx.getInvokeAction(new IncompleteBufferHolder(remainder));
 			}
-			else{
-				ctx.setMessage(object);
-				int completeMessageLen = 0;
-				if(object instanceof RequestWrapper){
-					completeMessageLen = ((RequestWrapper)object).getMessageLen();
-				}
-				else{
-					completeMessageLen = ((ResponseWrapper)object).getMessageLen();
-				}
-				final Buffer remainder = bufferLen > completeMessageLen ? 
-						buffer.split(completeMessageLen) : null;
-				buffer.tryDispose();
-				return ctx.getInvokeAction(remainder);
-			}
-		} 
-		catch (Exception e) {
-			LOGGER.error("decode message error",e);
+        } catch (Exception e) {
+            LOGGER.error("decode message error", e);
 			throw new IOException(e);
 		}
 	}
@@ -64,12 +85,49 @@ public class GrizzlyProtocolFilter extends BaseFilter{
 		GrizzlyByteBufferWrapper wrapper = new GrizzlyByteBufferWrapper(ctx);
 		try {
 			ProtocolUtils.encode(ctx.getMessage(), wrapper);
-			ctx.setMessage(wrapper.getBuffer().flip());
+            final Buffer buffer = wrapper.getBuffer();
+            buffer.trim();
+            
+            if (isBufferingEnabled) {
+                CompositeBuffer outputBuffer = OUTPUT_BUFFER_ATTR.get(ctx);
+                if (outputBuffer == null) {
+                    outputBuffer = CompositeBuffer.newBuffer(ctx.getMemoryManager());
+                    outputBuffer.allowBufferDispose(true);
+                    outputBuffer.allowInternalBuffersDispose(true);
+                    OUTPUT_BUFFER_ATTR.set(ctx, outputBuffer);
 		} 
-		catch (Exception e) {
-			throw new IOException("encode message to byte error",e);
-		}
+                outputBuffer.append(buffer);
+
+                return ctx.getStopAction();
+            } else {
+                ctx.setMessage(buffer);
 		return ctx.getInvokeAction();
 	}
 
+        } catch (Exception e) {
+            throw new IOException("encode message to byte error", e);
+}
+    }
+
+    @Override
+    public NextAction handleEvent(final FilterChainContext ctx,
+            final FilterChainEvent event) throws IOException {
+        
+        if (event.type() == TransportFilter.FlushEvent.TYPE) {
+            final CompositeBuffer outputBuffer = OUTPUT_BUFFER_ATTR.remove(ctx);
+            ctx.write(outputBuffer);
+        }
+        
+        return ctx.getStopAction();
+    }
+
+    
+    private static class IncompleteBufferHolder {
+
+        public IncompleteBufferHolder(Buffer buffer) {
+            this.buffer = buffer;
+        }
+
+        private Buffer buffer;
+    }
 }
