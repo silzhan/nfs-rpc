@@ -1,4 +1,5 @@
 package code.google.nfs.rpc.grizzly.serialize;
+
 /**
  * nfs-rpc
  *   Apache License
@@ -10,6 +11,7 @@ import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.memory.MemoryManager;
 
 import code.google.nfs.rpc.protocol.ByteBufferWrapper;
+
 /**
  * Grizzly ByteBuffer Wrapper
  * 
@@ -18,26 +20,27 @@ import code.google.nfs.rpc.protocol.ByteBufferWrapper;
 public class GrizzlyByteBufferWrapper implements ByteBufferWrapper {
 
 	private Buffer buffer;
-	
 	private FilterChainContext ctx;
 	
-	public GrizzlyByteBufferWrapper(FilterChainContext ctx){
+    public GrizzlyByteBufferWrapper(FilterChainContext ctx) {
 		this.ctx = ctx;
 	}
 	
-	public GrizzlyByteBufferWrapper(Buffer buffer){
+    public GrizzlyByteBufferWrapper(Buffer buffer) {
 		this.buffer = buffer;
 	}
 	
 	public ByteBufferWrapper get(int capacity) {
 		@SuppressWarnings("unchecked")
 		MemoryManager<Buffer> memoryManager = ctx.getConnection().getTransport().getMemoryManager();
-		buffer = memoryManager.allocate(capacity);
+        buffer = memoryManager.allocate(capacity * 2);
 		buffer.allowBufferDispose(true);
+        
+//        System.err.println("allocate " + capacity);
 		return this;
 	}
 	
-	public Buffer getBuffer(){
+    public Buffer getBuffer() {
 		return buffer;
 	}
 
@@ -58,11 +61,11 @@ public class GrizzlyByteBufferWrapper implements ByteBufferWrapper {
 	}
 
 	public int readerIndex() {
-		return 0;
+        return buffer.position();
 	}
 
 	public void setReaderIndex(int readerIndex) {
-		// Don't need,so do nothing
+        buffer.position(readerIndex);
 	}
 
 	public void writeByte(byte data) {
@@ -80,5 +83,4 @@ public class GrizzlyByteBufferWrapper implements ByteBufferWrapper {
 	public void writeInt(int data) {
 		buffer.putInt(data);
 	}
-
 }

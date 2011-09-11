@@ -43,7 +43,7 @@ public class GrizzlyClientFactory extends AbstractClientFactory {
 		GrizzlyClientHandler handler = new GrizzlyClientHandler();
 		FilterChainBuilder filterChainBuilder = FilterChainBuilder.stateless();
 		filterChainBuilder.add(new TransportFilter());
-		filterChainBuilder.add(new GrizzlyProtocolFilter());
+		filterChainBuilder.add(new GrizzlyProtocolFilter(false));
 		filterChainBuilder.add(handler);
 		final TCPNIOTransport transport = TCPNIOTransportBuilder.newInstance().build();
 		transport.setIOStrategy(SameThreadIOStrategy.getInstance());

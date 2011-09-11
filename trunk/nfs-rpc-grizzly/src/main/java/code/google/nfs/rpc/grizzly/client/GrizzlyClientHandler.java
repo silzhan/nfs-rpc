@@ -1,4 +1,5 @@
 package code.google.nfs.rpc.grizzly.client;
+
 /**
  * nfs-rpc
  *   Apache License
@@ -13,6 +14,8 @@ import org.glassfish.grizzly.filterchain.NextAction;
 
 import code.google.nfs.rpc.ResponseWrapper;
 import code.google.nfs.rpc.client.Client;
+import java.util.List;
+
 /**
  * Grizzly Client Handler
  * 
@@ -22,18 +25,34 @@ public class GrizzlyClientHandler extends BaseFilter {
 	
 	private Client client;
 	
-	public void setClient(Client client){
+    public void setClient(Client client) {
 		this.client = client;
 	}
 	
 	public NextAction handleRead(FilterChainContext ctx) throws IOException {
+        final Object message = ctx.getMessage();
+        
+        IllegalStateException error = null;
+        
 		try {
-			client.putResponse((ResponseWrapper) ctx.getMessage());
+            if (message instanceof List) {
+                @SuppressWarnings("unchecked")
+                List<ResponseWrapper> responses = (List<ResponseWrapper>) message;
+                client.putResponses(responses);
+            } else if (message instanceof ResponseWrapper) {
+                ResponseWrapper response = (ResponseWrapper) message;
+                client.putResponse(response);
+            } else {
+                error = new IllegalStateException("receive message error,only support List || ResponseWrapper");
 		} 
-		catch (Exception e) {
-			e.printStackTrace();
+        } catch (Exception e) {
+            error = new IllegalStateException(e);
 		}
-		return ctx.getStopAction();
+        
+        if (error != null) {
+            throw error;
 	}
 
+        return ctx.getStopAction();
+}
 }

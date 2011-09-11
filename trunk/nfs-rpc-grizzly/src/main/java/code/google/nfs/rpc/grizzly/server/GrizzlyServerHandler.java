@@ -44,6 +44,7 @@ public class GrizzlyServerHandler extends BaseFilter {
 		else{
 			handleOneRequest(ctx, (RequestWrapper)message);
 		}
+                ctx.flush(null);
 		return ctx.getStopAction();
 	}
 	
