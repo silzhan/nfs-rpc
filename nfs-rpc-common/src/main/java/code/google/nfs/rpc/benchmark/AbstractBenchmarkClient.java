@@ -127,9 +127,9 @@ public abstract class AbstractBenchmarkClient {
 					clientNums, timeout, codectype, requestSize, barrier, latch,
 					endtime, benchmarkBeginTime);
 			runnables.add(runnable);
-			Thread thread = new Thread(runnable, "benchmarkclient-" + i);
-			thread.start();
 		}
+
+                startRunnables(runnables);
 
 		latch.await();
 
@@ -270,5 +270,13 @@ public abstract class AbstractBenchmarkClient {
 	public abstract ClientRunnable getClientRunnable(String targetIP, int targetPort,
 			int clientNums, int rpcTimeout, int codecType, int requestSize,
 			CyclicBarrier barrier, CountDownLatch latch, long endTime, long startTime);
+
+    protected void startRunnables(List<ClientRunnable> runnables) {
+        for (int i = 0; i < runnables.size(); i++) {
+            final ClientRunnable runnable = runnables.get(i);
+            Thread thread = new Thread(runnable, "benchmarkclient-" + i);
+            thread.start();
+}
+    }
 
 }
