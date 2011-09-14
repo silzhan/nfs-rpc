@@ -5,11 +5,6 @@ package code.google.nfs.rpc;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import code.google.nfs.rpc.protocol.Protocol;
 import code.google.nfs.rpc.protocol.RPCProtocol;
 import code.google.nfs.rpc.protocol.SimpleProcessorProtocol;
@@ -24,13 +19,11 @@ import code.google.nfs.rpc.server.SimpleProcessorServerHandler;
  */
 public class ProtocolFactory {
 	
-	private static final Log LOGGER = LogFactory.getLog(ProtocolFactory.class);
+//	private static final Log LOGGER = LogFactory.getLog(ProtocolFactory.class);
 	
-	private static ConcurrentHashMap<Integer, Protocol> protocolHandlers = 
-		new ConcurrentHashMap<Integer, Protocol>();
+	private static Protocol[] protocolHandlers = new Protocol[10];
 	
-	private static ConcurrentHashMap<Integer, ServerHandler> serverHandlers = 
-			new ConcurrentHashMap<Integer, ServerHandler>();
+	private static ServerHandler[] serverHandlers = new ServerHandler[10];
 	
 	static{
 		registerProtocol(RPCProtocol.TYPE, new RPCProtocol(), new RPCServerHandler());
@@ -38,20 +31,16 @@ public class ProtocolFactory {
 	}
 	
 	public static void registerProtocol(Integer type,Protocol customProtocol,ServerHandler customServerHandler){
-		Protocol existProtocol = protocolHandlers.putIfAbsent(type, customProtocol);
-		if(existProtocol !=  null){
-			LOGGER.warn("protocol type: "+type+" registered more than once,now used is: "+existProtocol);
-			return;
-		}
-		serverHandlers.putIfAbsent(type, customServerHandler);
+		protocolHandlers[type] = customProtocol;
+		serverHandlers[type] = customServerHandler;
 	}
 	
 	public static Protocol getProtocol(Integer type){
-		return protocolHandlers.get(type);
+		return protocolHandlers[type];
 	}
 	
 	public static ServerHandler getServerHandler(Integer type){
-		return serverHandlers.get(type);
+		return serverHandlers[type];
 	}
 	
 }
