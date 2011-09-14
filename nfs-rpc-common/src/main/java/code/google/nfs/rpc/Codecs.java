@@ -5,9 +5,6 @@ package code.google.nfs.rpc;
  *   
  *   http://code.google.com/p/nfs-rpc (c) 2011
  */
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import code.google.nfs.rpc.protocol.Decoder;
 import code.google.nfs.rpc.protocol.Encoder;
 import code.google.nfs.rpc.protocol.HessianDecoder;
@@ -29,9 +26,9 @@ public class Codecs {
 	
 	public static final Integer PB_CODEC = 3;
 	
-	private static Map<Integer, Encoder> encoders = new ConcurrentHashMap<Integer, Encoder>();
+	private static Encoder[] encoders = new Encoder[10];
 	
-	private static Map<Integer, Decoder> decoders = new ConcurrentHashMap<Integer, Decoder>();
+	private static Decoder[] decoders = new Decoder[10];
 	
 	static{
 		addEncoder(JAVA_CODEC, new JavaEncoder());
@@ -43,19 +40,19 @@ public class Codecs {
 	}
 	
 	public static void addEncoder(Integer encoderKey,Encoder encoder){
-		encoders.put(encoderKey, encoder);
+		encoders[encoderKey] = encoder;
 	}
 	
 	public static void addDecoder(Integer decoderKey,Decoder decoder){
-		decoders.put(decoderKey, decoder);
+		decoders[decoderKey] = decoder;
 	}
 	
 	public static Encoder getEncoder(Integer encoderKey){
-		return encoders.get(encoderKey);
+		return encoders[encoderKey];
 	}
 	
 	public static Decoder getDecoder(Integer decoderKey){
-		return decoders.get(decoderKey);
+		return decoders[decoderKey];
 	}
 	
 }
