@@ -13,7 +13,7 @@ package code.google.nfs.rpc;
  */
 public class ResponseWrapper {
 
-	private Integer requestId = 0;
+	private int requestId = 0;
 	
 	private Object response = null;
 	
@@ -21,15 +21,15 @@ public class ResponseWrapper {
 	
 	private Throwable exception = null;
 	
-	private Integer codecType = Codecs.HESSIAN_CODEC;
+	private int codecType = Codecs.HESSIAN_CODEC;
 	
-	private Integer protocolType;
+	private int protocolType;
 	
 	private int messageLen;
 	
 	private String responseClassName;
 
-	public ResponseWrapper(Integer requestId,Integer codecType,Integer protocolType){
+	public ResponseWrapper(int requestId,int codecType,int protocolType){
 		this.requestId = requestId;
 		this.codecType = codecType;
 		this.protocolType = protocolType;
@@ -43,15 +43,15 @@ public class ResponseWrapper {
 		this.messageLen = messageLen;
 	}
 
-	public Integer getProtocolType() {
+	public int getProtocolType() {
 		return protocolType;
 	}
 
-	public Integer getCodecType() {
+	public int getCodecType() {
 		return codecType;
 	}
 
-	public Integer getRequestId() {
+	public int getRequestId() {
 		return requestId;
 	}
 
