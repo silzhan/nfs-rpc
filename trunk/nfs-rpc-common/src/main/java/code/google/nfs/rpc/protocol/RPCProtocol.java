@@ -68,7 +68,7 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public class RPCProtocol implements Protocol {
 	
-	public static final Integer TYPE = 1;
+	public static final int TYPE = 1;
 	
 	private static final Log LOGGER = LogFactory.getLog(RPCProtocol.class);
 	
@@ -114,10 +114,10 @@ public class RPCProtocol implements Protocol {
 				int capacity = ProtocolUtils.HEADER_LEN + REQUEST_HEADER_LEN + requestArgTypesLen + requestArgsLen;
 				ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 				byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
-				byteBuffer.writeByte((byte)TYPE.intValue());
+				byteBuffer.writeByte((byte)TYPE);
 				byteBuffer.writeByte(VERSION);
 				byteBuffer.writeByte(type);
-				byteBuffer.writeByte((byte)wrapper.getCodecType().intValue());
+				byteBuffer.writeByte((byte)wrapper.getCodecType());
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
 				byteBuffer.writeByte((byte)0);
@@ -170,10 +170,10 @@ public class RPCProtocol implements Protocol {
 			}
 			ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 			byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
-			byteBuffer.writeByte((byte)TYPE.intValue());
+			byteBuffer.writeByte((byte)TYPE);
 			byteBuffer.writeByte(VERSION);
 			byteBuffer.writeByte(type);
-			byteBuffer.writeByte((byte)wrapper.getCodecType().intValue());
+			byteBuffer.writeByte((byte)wrapper.getCodecType());
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeByte((byte)0);

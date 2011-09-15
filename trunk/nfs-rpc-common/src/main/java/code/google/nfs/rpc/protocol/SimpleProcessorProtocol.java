@@ -34,7 +34,7 @@ import code.google.nfs.rpc.ResponseWrapper;
  */
 public class SimpleProcessorProtocol implements Protocol{
 	
-	public static final Integer TYPE = 2;
+	public static final int TYPE = 2;
 	
 	private static final Log LOGGER = LogFactory.getLog(SimpleProcessorProtocol.class);
 	
@@ -54,7 +54,7 @@ public class SimpleProcessorProtocol implements Protocol{
 		byte type = REQUEST;
 		byte[] body = null;
 		int timeout = 0;
-		Integer codecType = 0;
+		int codecType = 0;
 		byte[] className = null;
 		if(message instanceof RequestWrapper){
 			try{
@@ -96,10 +96,10 @@ public class SimpleProcessorProtocol implements Protocol{
 		}
 		ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 		byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
-		byteBuffer.writeByte((byte)TYPE.intValue());
+		byteBuffer.writeByte((byte)TYPE);
 		byteBuffer.writeByte(VERSION);
 		byteBuffer.writeByte(type);
-		byteBuffer.writeByte((byte)codecType.intValue());
+		byteBuffer.writeByte((byte)codecType);
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);
 		byteBuffer.writeByte((byte)0);

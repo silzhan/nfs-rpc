@@ -30,17 +30,17 @@ public class RequestWrapper {
 	
 	private int id = 0;
 	
-	private Integer protocolType;
+	private int protocolType;
 	
-	private Integer codecType = Codecs.HESSIAN_CODEC;
+	private int codecType = Codecs.HESSIAN_CODEC;
 	
 	private int messageLen;
 
-	public RequestWrapper(Object message,int timeout,Integer codecType,Integer protocolType){
+	public RequestWrapper(Object message,int timeout,int codecType,int protocolType){
 		this(message,timeout,incId.incrementAndGet(),codecType,protocolType);
 	}
 	
-	public RequestWrapper(Object message,int timeout,int id,Integer codecType,Integer protocolType){
+	public RequestWrapper(Object message,int timeout,int id,int codecType,int protocolType){
 		this.message = message;
 		this.id = id;
 		this.timeout = timeout;
@@ -49,12 +49,12 @@ public class RequestWrapper {
 	}
 
 	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
-						  Object[] requestObjects,int timeout,Integer codecType,Integer protocolType){
+						  Object[] requestObjects,int timeout,int codecType,int protocolType){
 		this(targetInstanceName,methodName,argTypes,requestObjects,timeout,incId.incrementAndGet(),codecType,protocolType);
 	}
 
 	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
-						  Object[] requestObjects,int timeout,int id,Integer codecType,Integer protocolType){
+						  Object[] requestObjects,int timeout,int id,int codecType,int protocolType){
 		this.requestObjects = requestObjects;
 		this.id = id;
 		this.timeout = timeout;
@@ -76,11 +76,11 @@ public class RequestWrapper {
 		this.argTypes = argTypes;
 	}
 	
-	public Integer getProtocolType() {
+	public int getProtocolType() {
 		return protocolType;
 	}
 
-	public Integer getCodecType() {
+	public int getCodecType() {
 		return codecType;
 	}
 	
