@@ -65,7 +65,7 @@ public class NettyServer implements Server {
 		LOGGER.warn("Server started,listen at: "+listenPort);
 	}
 
-	public void registerProcessor(Integer protocolType,String serviceName, Object serviceInstance) {
+	public void registerProcessor(int protocolType,String serviceName, Object serviceInstance) {
 		ProtocolFactory.getServerHandler(protocolType).registerProcessor(serviceName, serviceInstance);
 	}
 	

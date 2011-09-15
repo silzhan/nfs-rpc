@@ -101,10 +101,11 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 		public void run() {
 			long beginTime = System.currentTimeMillis();
 			ResponseWrapper responseWrapper = ProtocolFactory.getServerHandler(request.getProtocolType()).handleRequest(request);
+			final int id = request.getId();
 			// already timeout,so not return
 			if ((System.currentTimeMillis() - beginTime) >= request.getTimeout()) {
 				LOGGER.warn("timeout,so give up send response to client,requestId is:"
-						+ request.getId()
+						+ id
 						+ ",client is:"
 						+ ctx.getChannel().getRemoteAddress()+",consumetime is:"+(System.currentTimeMillis() - beginTime)+",timeout is:"+request.getTimeout());
 				return;
@@ -113,7 +114,7 @@ public class NettyServerHandler extends SimpleChannelUpstreamHandler {
 			wf.addListener(new ChannelFutureListener() {
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if(!future.isSuccess()){
-						LOGGER.error("server write response error,request id is: "+request.getId());
+						LOGGER.error("server write response error,request id is: " + id);
 					}
 				}
 			});
