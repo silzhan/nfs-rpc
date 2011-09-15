@@ -58,7 +58,7 @@ public class GrizzlyServer implements Server {
 		}
 	}
 	
-	public void registerProcessor(Integer protocolType, String serviceName, Object serviceInstance) {
+	public void registerProcessor(int protocolType, String serviceName, Object serviceInstance) {
 		ProtocolFactory.getServerHandler(protocolType).registerProcessor(serviceName, serviceInstance);
 	}
 }
