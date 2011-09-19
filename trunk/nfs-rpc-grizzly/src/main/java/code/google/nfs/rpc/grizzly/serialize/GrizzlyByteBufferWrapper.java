@@ -11,6 +11,7 @@ import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.memory.MemoryManager;
 
 import code.google.nfs.rpc.protocol.ByteBufferWrapper;
+import org.glassfish.grizzly.memory.Buffers;
 
 /**
  * Grizzly ByteBuffer Wrapper
@@ -31,12 +32,7 @@ public class GrizzlyByteBufferWrapper implements ByteBufferWrapper {
 	}
 	
 	public ByteBufferWrapper get(int capacity) {
-		@SuppressWarnings("unchecked")
-		MemoryManager<Buffer> memoryManager = ctx.getConnection().getTransport().getMemoryManager();
-        buffer = memoryManager.allocate(capacity * 2);
-		buffer.allowBufferDispose(true);
-        
-//        System.err.println("allocate " + capacity);
+                buffer = Buffers.wrap(ctx.getMemoryManager(), new byte[capacity]);
 		return this;
 	}
 	

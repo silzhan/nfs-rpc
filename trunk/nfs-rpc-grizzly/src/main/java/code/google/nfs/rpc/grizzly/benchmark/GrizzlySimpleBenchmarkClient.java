@@ -22,12 +22,14 @@ import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 public class GrizzlySimpleBenchmarkClient extends AbstractSimpleProcessorBenchmarkClient {
 
     public static void main(String[] args) throws Exception {
-		new GrizzlySimpleBenchmarkClient().run(args);
-	}
-	
-	public ClientFactory getClientFactory() {
-		return GrizzlyClientFactory.getInstance();
-	}
+        String[] myArgs = new String[] {"localhost", "9090", "1", "500", "2", "100", "60"};
+//        new GrizzlySimpleBenchmarkClient().run(myArgs);
+        new GrizzlySimpleBenchmarkClient().run(args);
+    }
+
+    public ClientFactory getClientFactory() {
+        return GrizzlyClientFactory.getInstance();
+    }
 
     @Override
     protected void startRunnables(List<ClientRunnable> runnables) {
@@ -36,12 +38,12 @@ public class GrizzlySimpleBenchmarkClient extends AbstractSimpleProcessorBenchma
                 .setPoolName("benchmarkclient")
                 .setMaxPoolSize(runnables.size())
                 .setCorePoolSize(runnables.size());
-        
+
         GrizzlyExecutorService executorService = GrizzlyExecutorService.createInstance(tpc);
-        
+
         for (int i = 0; i < runnables.size(); i++) {
             ClientRunnable runnable = runnables.get(i);
             executorService.execute(runnable);
-}
-    }        
+        }
+    }
 }
