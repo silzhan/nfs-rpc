@@ -111,7 +111,8 @@ public class RPCProtocol implements Protocol {
 				byte[] methodNameByte = wrapper.getMethodName().getBytes();
 				id = wrapper.getId();
 				int timeout = wrapper.getTimeout();
-				int capacity = ProtocolUtils.HEADER_LEN + REQUEST_HEADER_LEN + requestArgTypesLen + requestArgsLen;
+				int capacity = ProtocolUtils.HEADER_LEN + REQUEST_HEADER_LEN + requestArgs.size() * 4 * 2 + targetInstanceNameByte.length 
+							   + methodNameByte.length + requestArgTypesLen + requestArgsLen;
 				ByteBufferWrapper byteBuffer = bytebufferWrapper.get(capacity);
 				byteBuffer.writeByte(ProtocolUtils.CURRENT_VERSION);
 				byteBuffer.writeByte((byte)TYPE);
