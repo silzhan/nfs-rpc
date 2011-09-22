@@ -42,8 +42,8 @@ public class MinaClientFactory extends AbstractClientFactory {
 		// only one ioConnector,avoid create too many io processor thread
 		ioConnector = new NioSocketConnector(processorCount);
 //        ioConnector.getFilterChain().addLast("executor", new ExecutorFilter(Executors.newCachedThreadPool()));
-//		ioConnector.getSessionConfig().setTcpNoDelay(Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
-		ioConnector.getSessionConfig().setTcpNoDelay(true);
+		ioConnector.getSessionConfig().setTcpNoDelay(Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
+		ioConnector.getSessionConfig().setReuseAddress(true);
 		ioConnector.getFilterChain().addLast("objectserialize",new MinaProtocolCodecFilter());
 	}
 
