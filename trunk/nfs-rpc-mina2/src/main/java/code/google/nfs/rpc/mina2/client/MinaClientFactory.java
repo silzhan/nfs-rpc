@@ -7,11 +7,13 @@ package code.google.nfs.rpc.mina2.client;
  */
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.mina.core.future.ConnectFuture;
 import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.executor.ExecutorFilter;
 import org.apache.mina.transport.socket.SocketConnector;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
@@ -39,7 +41,9 @@ public class MinaClientFactory extends AbstractClientFactory {
 	private MinaClientFactory() {
 		// only one ioConnector,avoid create too many io processor thread
 		ioConnector = new NioSocketConnector(processorCount);
-		ioConnector.getSessionConfig().setTcpNoDelay(Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
+//        ioConnector.getFilterChain().addLast("executor", new ExecutorFilter(Executors.newCachedThreadPool()));
+//		ioConnector.getSessionConfig().setTcpNoDelay(Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
+		ioConnector.getSessionConfig().setTcpNoDelay(true);
 		ioConnector.getFilterChain().addLast("objectserialize",new MinaProtocolCodecFilter());
 	}
 
