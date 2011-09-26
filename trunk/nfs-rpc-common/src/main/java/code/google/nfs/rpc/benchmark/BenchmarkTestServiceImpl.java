@@ -6,6 +6,8 @@
  */
 package code.google.nfs.rpc.benchmark;
 
+import code.google.nfs.rpc.benchmark.PB.RequestObject;
+
 
 /**
  * Just for Reflection RPC Benchmark
@@ -23,6 +25,10 @@ public class BenchmarkTestServiceImpl implements BenchmarkTestService {
 	// support java/hessian/pb codec
 	public Object execute(Object request) {
 		return new ResponseObject(responseSize);
+	}
+
+	public Object executePB(RequestObject request) {
+		throw new UnsupportedOperationException("unsupported");
 	}
 
 }

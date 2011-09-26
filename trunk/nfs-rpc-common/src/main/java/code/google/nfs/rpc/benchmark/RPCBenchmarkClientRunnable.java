@@ -153,14 +153,14 @@ public class RPCBenchmarkClientRunnable implements ClientRunnable {
 		while (running) {
 			code.google.nfs.rpc.benchmark.PB.RequestObject.Builder objectBuilder = PB.RequestObject.newBuilder();
 			objectBuilder.setBytesObject(ByteString.copyFrom(new byte[requestSize]));
-			Object requestObject = objectBuilder.build();
+			PB.RequestObject requestObject = objectBuilder.build();
 			long beginTime = System.currentTimeMillis();
 			if (beginTime >= endTime) {
 				running = false;
 				break;
 			}
 			try {
-				Object response = testService.execute(requestObject);
+				Object response = testService.executePB(requestObject);
 				long currentTime = System.currentTimeMillis();
 				if(beginTime <= startTime){
 					continue;

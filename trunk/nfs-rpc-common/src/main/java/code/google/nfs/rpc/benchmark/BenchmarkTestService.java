@@ -14,4 +14,6 @@ public interface BenchmarkTestService {
 
 	public Object execute(Object request);
 	
+	public Object executePB(PB.RequestObject request);
+	
 }
