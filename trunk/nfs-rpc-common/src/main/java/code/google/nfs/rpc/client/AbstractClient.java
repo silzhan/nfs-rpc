@@ -128,7 +128,10 @@ public abstract class AbstractClient implements Client {
 		try{
 			// do deserialize in business threadpool
 			if (responseWrapper.getResponse() instanceof byte[]) {
-				String responseClassName = new String(responseWrapper.getResponseClassName());
+				String responseClassName = null;
+				if(responseWrapper.getResponseClassName() != null){
+					responseClassName = new String(responseWrapper.getResponseClassName());
+				}
 				Object responseObject = Codecs.getDecoder(responseWrapper.getCodecType()).decode(
 					responseClassName,(byte[]) responseWrapper.getResponse());
 				if (responseObject instanceof Throwable) {
