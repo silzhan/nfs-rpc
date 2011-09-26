@@ -61,6 +61,7 @@ public class RequestWrapper {
 		this.targetInstanceName = targetInstanceName;
 		this.methodName = methodName;
 		this.argTypes = argTypes;
+		this.codecType = codecType;
 		this.protocolType = protocolType;
 	}
 

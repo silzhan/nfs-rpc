@@ -6,6 +6,8 @@
  */
 package code.google.nfs.rpc.benchmark;
 
+import code.google.nfs.rpc.benchmark.PB.RequestObject;
+
 import com.google.protobuf.ByteString;
 
 /**
@@ -23,6 +25,10 @@ public class PBBenchmarkTestServiceImpl implements BenchmarkTestService {
 	
 	// support java/hessian/pb codec
 	public Object execute(Object request) {
+		throw new UnsupportedOperationException("unsupported");
+	}
+
+	public Object executePB(RequestObject request) {
 		PB.ResponseObject.Builder  builder = PB.ResponseObject.newBuilder();
 		builder.setBytesObject(ByteString.copyFrom(new byte[responseSize]));
 		return builder.build();

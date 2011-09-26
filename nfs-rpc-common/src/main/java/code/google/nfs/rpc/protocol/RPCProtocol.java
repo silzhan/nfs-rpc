@@ -182,10 +182,10 @@ public class RPCProtocol implements Protocol {
 			byteBuffer.writeByte((byte)0);
 			byteBuffer.writeInt(id);
 			if(wrapper.getCodecType() == Codecs.PB_CODEC){
-				byteBuffer.writeInt(0);
+				byteBuffer.writeInt(className.length);
 			}
 			else{
-				byteBuffer.writeInt(className.length);
+				byteBuffer.writeInt(0);
 			}
 			byteBuffer.writeInt(body.length);
 			if(wrapper.getCodecType() == Codecs.PB_CODEC){
