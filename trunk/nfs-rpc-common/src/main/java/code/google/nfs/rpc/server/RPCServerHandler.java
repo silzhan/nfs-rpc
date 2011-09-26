@@ -48,9 +48,13 @@ public class RPCServerHandler implements ServerHandler {
 	
 	public ResponseWrapper handleRequest(final RequestWrapper request){
 		ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(),request.getCodecType(),request.getProtocolType());
-		String targetInstanceName = request.getTargetInstanceName();
-		String methodName = request.getMethodName();
-		String[] argTypes = request.getArgTypes();
+		String targetInstanceName = new String(request.getTargetInstanceName());
+		String methodName = new String(request.getMethodName());
+		byte[][] argTypeBytes  = request.getArgTypes();
+		String[] argTypes = new String[argTypeBytes.length];
+		for(int i = 0; i <argTypeBytes.length; i++) {
+		    argTypes[i] = new String(argTypeBytes[i]);
+		}
 		Object[] requestObjects = null;
 		Method method = null;
 		try{
@@ -76,7 +80,7 @@ public class RPCServerHandler implements ServerHandler {
 						.getRequestObjects();
 				for (int i = 0; i < tmprequestObjects.length; i++) {
 					try{
-						requestObjects[i] = Codecs.getDecoder(request.getCodecType()).decode(request.getArgTypes()[i],(byte[])tmprequestObjects[i]);
+						requestObjects[i] = Codecs.getDecoder(request.getCodecType()).decode(argTypes[i],(byte[])tmprequestObjects[i]);
 					}
 					catch(Exception e){
 						throw new Exception("decode request object args error",e);
