@@ -145,11 +145,10 @@ public class SimpleProcessorProtocol implements Protocol{
     			wrapper.setReaderIndex(originPos);
     			return errorObject;
     		}
-    		String className = "";
+    		byte[] classNameByte = null;
     		if(codecType == Codecs.PB_CODEC){
-	    		byte[] classNameByte = new byte[classNameLen];
+	    		classNameByte = new byte[classNameLen];
 	    		wrapper.readBytes(classNameByte);
-		    	className = new String(classNameByte);
     		}
     		byte[] body = new byte[bodyLen];
     		wrapper.readBytes(body);
@@ -157,14 +156,14 @@ public class SimpleProcessorProtocol implements Protocol{
         	if(type == REQUEST){
         		RequestWrapper requestWrapper = new RequestWrapper(body,timeout,requestId,codecType, TYPE);
         		requestWrapper.setMessageLen(messageLen);
-        		requestWrapper.setArgTypes(new String[]{className});
+        		requestWrapper.setArgTypes(new byte[][]{classNameByte});
         		return requestWrapper;
         	}
         	else if(type == RESPONSE){
         		ResponseWrapper responseWrapper = new ResponseWrapper(requestId,codecType,TYPE);
             	responseWrapper.setResponse(body);
             	responseWrapper.setMessageLen(messageLen);
-            	responseWrapper.setResponseClassName(className);
+            	responseWrapper.setResponseClassName(classNameByte);
 	        	return responseWrapper;
         	}
         	else{

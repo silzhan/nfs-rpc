@@ -16,11 +16,11 @@ public class RequestWrapper {
 	
 	private static AtomicInteger incId = new AtomicInteger(0);
 	
-	private String targetInstanceName;
+	private byte[] targetInstanceName;
 	
-	private String methodName;
+	private byte[] methodName;
 	
-	private String[] argTypes;
+	private byte[][] argTypes;
 
 	private Object[] requestObjects = null;
 	
@@ -48,12 +48,12 @@ public class RequestWrapper {
 		this.protocolType = protocolType;
 	}
 
-	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
+	public RequestWrapper(byte[] targetInstanceName,byte[] methodName,byte[][] argTypes,
 						  Object[] requestObjects,int timeout,int codecType,int protocolType){
 		this(targetInstanceName,methodName,argTypes,requestObjects,timeout,incId.incrementAndGet(),codecType,protocolType);
 	}
 
-	public RequestWrapper(String targetInstanceName,String methodName,String[] argTypes,
+	public RequestWrapper(byte[] targetInstanceName,byte[] methodName,byte[][] argTypes,
 						  Object[] requestObjects,int timeout,int id,int codecType,int protocolType){
 		this.requestObjects = requestObjects;
 		this.id = id;
@@ -72,7 +72,7 @@ public class RequestWrapper {
 		this.messageLen = messageLen;
 	}
 	
-	public void setArgTypes(String[] argTypes) {
+	public void setArgTypes(byte[][] argTypes) {
 		this.argTypes = argTypes;
 	}
 	
@@ -88,11 +88,11 @@ public class RequestWrapper {
 		return message;
 	}
 	
-	public String getTargetInstanceName() {
+	public byte[] getTargetInstanceName() {
 		return targetInstanceName;
 	}
 
-	public String getMethodName() {
+	public byte[] getMethodName() {
 		return methodName;
 	}
 
@@ -108,7 +108,7 @@ public class RequestWrapper {
 		return id;
 	}	
 	
-	public String[] getArgTypes() {
+	public byte[][] getArgTypes() {
 		return argTypes;
 	}
 	

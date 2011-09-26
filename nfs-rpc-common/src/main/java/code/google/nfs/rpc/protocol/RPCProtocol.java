@@ -95,11 +95,10 @@ public class RPCProtocol implements Protocol {
 				List<byte[]> requestArgTypes = new ArrayList<byte[]>();
 				List<byte[]> requestArgs = new ArrayList<byte[]>();
 				RequestWrapper wrapper = (RequestWrapper) message;
-				String[] requestArgTypeStrings = wrapper.getArgTypes();
-				for (String requestArgType : requestArgTypeStrings) {
-					byte[] argTypeByte = requestArgType.getBytes();
-					requestArgTypes.add(argTypeByte);
-					requestArgTypesLen += argTypeByte.length;
+				byte[][] requestArgTypeStrings = wrapper.getArgTypes();
+				for (byte[] requestArgType : requestArgTypeStrings) {
+					requestArgTypes.add(requestArgType);
+					requestArgTypesLen += requestArgType.length;
 				}
 				Object[] requestObjects = wrapper.getRequestObjects();
 				for (Object requestArg : requestObjects) {
@@ -107,8 +106,8 @@ public class RPCProtocol implements Protocol {
 					requestArgs.add(requestArgByte);
 					requestArgsLen += requestArgByte.length;
 				}
-				byte[] targetInstanceNameByte = wrapper.getTargetInstanceName().getBytes();
-				byte[] methodNameByte = wrapper.getMethodName().getBytes();
+				byte[] targetInstanceNameByte = wrapper.getTargetInstanceName();
+				byte[] methodNameByte = wrapper.getMethodName();
 				id = wrapper.getId();
 				int timeout = wrapper.getTimeout();
 				int capacity = ProtocolUtils.HEADER_LEN + REQUEST_HEADER_LEN + requestArgs.size() * 4 * 2 + targetInstanceNameByte.length 
@@ -152,6 +151,9 @@ public class RPCProtocol implements Protocol {
 			ResponseWrapper wrapper = (ResponseWrapper) message;
 			byte[] body = null;
 			byte[] className = null;
+			if(wrapper.getResponse() == null){
+				wrapper.setResponse(true);
+			}
 			try{
 				className = wrapper.getResponse().getClass().getName().getBytes();
 				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
@@ -242,19 +244,17 @@ public class RPCProtocol implements Protocol {
 				}
         		byte[] targetInstanceByte = new byte[targetInstanceLen];
         		wrapper.readBytes(targetInstanceByte);
-        		String targetInstanceName = new String(targetInstanceByte);
         		byte[] methodNameByte = new byte[methodNameLen];
         		wrapper.readBytes(methodNameByte);
-        		String methodName = new String(methodNameByte);
         		if(wrapper.readableBytes() < expectedLen){
         			wrapper.setReaderIndex(originPos);
         			return errorObject;
         		}
-        		String[] argTypes = new String[argsCount];
+        		byte[][] argTypes = new byte[argsCount][];
         		for (int i = 0; i < argsCount; i++) {
 					byte[] argTypeByte = new byte[argsTypeLen[i]];
 					wrapper.readBytes(argTypeByte);
-					argTypes[i] = new String(argTypeByte);
+					argTypes[i] = argTypeByte;
 				}
         		Object[] args = new Object[argsCount];
         		for (int i = 0; i < argsCount; i++) {
@@ -262,7 +262,7 @@ public class RPCProtocol implements Protocol {
 					wrapper.readBytes(argByte);
 					args[i] = argByte;
 				}
-        		RequestWrapper requestWrapper = new RequestWrapper(targetInstanceName, methodName, 
+        		RequestWrapper requestWrapper = new RequestWrapper(targetInstanceByte, methodNameByte, 
         														   argTypes, args, timeout, requestId, codecType, TYPE);
         		int messageLen = ProtocolUtils.HEADER_LEN + REQUEST_HEADER_LEN + expectedLenInfoLen + expectedLen;
         		requestWrapper.setMessageLen(messageLen);
@@ -284,17 +284,17 @@ public class RPCProtocol implements Protocol {
             		wrapper.setReaderIndex(originPos);
             		return errorObject;
             	}
-            	String className = "";
+
+            	byte[] classNameBytes = null;
             	if(codecType == Codecs.PB_CODEC){
-	            	byte[] classNameBytes = new byte[classNameLen];
+	            	classNameBytes = new byte[classNameLen];
 	            	wrapper.readBytes(classNameBytes);
-	            	className = new String(classNameBytes);
             	}
             	byte[] bodyBytes = new byte[bodyLen];
             	wrapper.readBytes(bodyBytes);
             	ResponseWrapper responseWrapper = new ResponseWrapper(requestId,codecType,TYPE);
             	responseWrapper.setResponse(bodyBytes);
-            	responseWrapper.setResponseClassName(className);
+            	responseWrapper.setResponseClassName(classNameBytes);
 	        	int messageLen = ProtocolUtils.HEADER_LEN + RESPONSE_HEADER_LEN + classNameLen + bodyLen;
 	        	responseWrapper.setMessageLen(messageLen);
             	return responseWrapper;

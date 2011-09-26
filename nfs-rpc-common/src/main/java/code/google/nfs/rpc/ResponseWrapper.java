@@ -27,7 +27,7 @@ public class ResponseWrapper {
 	
 	private int messageLen;
 	
-	private String responseClassName;
+	private byte[] responseClassName;
 
 	public ResponseWrapper(int requestId,int codecType,int protocolType){
 		this.requestId = requestId;
@@ -76,11 +76,11 @@ public class ResponseWrapper {
 		isError = true;
 	}
 	
-	public String getResponseClassName() {
+	public byte[] getResponseClassName() {
 		return responseClassName;
 	}
 
-	public void setResponseClassName(String responseClassName) {
+	public void setResponseClassName(byte[] responseClassName) {
 		this.responseClassName = responseClassName;
 	}
 	

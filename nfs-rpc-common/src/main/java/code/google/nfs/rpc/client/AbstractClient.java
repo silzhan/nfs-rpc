@@ -46,8 +46,12 @@ public abstract class AbstractClient implements Client {
 	public Object invokeSync(String targetInstanceName, String methodName,
 			String[] argTypes, Object[] args, int timeout, int codecType, int protocolType)
 			throws Exception {
-		RequestWrapper wrapper = new RequestWrapper(targetInstanceName,
-				methodName, argTypes, args, timeout, codecType, protocolType);
+		byte[][] argTypeBytes = new byte[argTypes.length][];
+		for(int i =0; i < argTypes.length; i++) {
+		    argTypeBytes[i] =  argTypes[i].getBytes();
+		}
+		RequestWrapper wrapper = new RequestWrapper(targetInstanceName.getBytes(),
+				methodName.getBytes(), argTypeBytes, args, timeout, codecType, protocolType);
 		return invokeSyncIntern(wrapper);
 	}
 
@@ -124,8 +128,9 @@ public abstract class AbstractClient implements Client {
 		try{
 			// do deserialize in business threadpool
 			if (responseWrapper.getResponse() instanceof byte[]) {
+				String responseClassName = new String(responseWrapper.getResponseClassName());
 				Object responseObject = Codecs.getDecoder(responseWrapper.getCodecType()).decode(
-						responseWrapper.getResponseClassName(),(byte[]) responseWrapper.getResponse());
+					responseClassName,(byte[]) responseWrapper.getResponse());
 				if (responseObject instanceof Throwable) {
 					responseWrapper.setException((Throwable) responseObject);
 				} 
