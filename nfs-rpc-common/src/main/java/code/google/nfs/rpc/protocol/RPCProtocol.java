@@ -286,7 +286,7 @@ public class RPCProtocol implements Protocol {
             	}
 
             	byte[] classNameBytes = null;
-            	if(codecType == Codecs.PB_CODEC){
+            	if(codecType == Codecs.PB_CODEC){	
 	            	classNameBytes = new byte[classNameLen];
 	            	wrapper.readBytes(classNameBytes);
             	}
