@@ -32,9 +32,11 @@ public class SimpleProcessorServerHandler implements ServerHandler{
 	public ResponseWrapper handleRequest(final RequestWrapper request){
 		ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(),request.getCodecType(),request.getProtocolType());
 		try{
-			String argType = new String(request.getArgTypes()[0]);
+			String argType = null;
+			if(request.getArgTypes() != null && request.getArgTypes()[0] != null){
+				argType = new String(request.getArgTypes()[0]);
+			}
 			Object requestObject = Codecs.getDecoder(request.getCodecType()).decode(argType,(byte[])request.getMessage());
-//			Object requestObject = Codecs.getDecoder(request.getCodecType()).decode("",(byte[])request.getMessage());
 			responseWrapper.setResponse(processors.get(requestObject.getClass().getName()).handle(requestObject));
 		}
 		catch(Exception e){
