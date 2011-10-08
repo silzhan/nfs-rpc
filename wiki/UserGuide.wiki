@@ -43,7 +43,8 @@ Use this rpc framework,u can realize rpc very simply.
     {{{
        // rpcTimeout mean how long u will wait here for server return
        // datatype mean serialize/deserialize
-       //       current only support Java or Hessian
+       //       current support Java or Hessian or Protobuf
+       // if u use Protobuf,pls call PBDecoder.addMessage first.
        String result=client.invokeSync("hello",rpcTimeout,Protocol.HESSIAN_DATA,SimpleProcessorProtocol.TYPE);
     }}}
 
