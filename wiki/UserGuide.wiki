@@ -35,7 +35,7 @@ Use this rpc framework,u can realize rpc very simply.
   If u want to call MyProcessor,u can follow below steps.
   * Get Client instance
     {{{
-       // clientNums mean how much connection to server
+       // clientNums mean how many connections to server
        // we appreciate single connection to the same serverIP & serverPort 
        Client client = MinaClientFactory.getInstance().get(serverIP,serverPort,connectTimeOut,clientNums);
     }}}
