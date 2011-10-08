@@ -86,6 +86,8 @@ Use this rpc framework,u can realize rpc very simply.
         methodTimeouts.put("*", timeout);
 	List<InetSocketAddress> servers = new ArrayList<InetSocketAddress>();
 	servers.add(new InetSocketAddress(serverIP, serverPort));
+        // Protocol also support Protobuf & Java,if u use Protobuf,u need call PBDecoder.addMessage first.
+        int codectype = Protocol.HESSIAN_DATA;
         HelloWorldService service = (HelloWorldService) Proxy.newProxyInstance(
 				this.getClass().getClassLoader(),
 				new Class<?>[] { HelloWorldService.class },
