@@ -6,10 +6,10 @@
   * Implement Decoder & Encoder interface;
   * Register Your Decoder & Encoder implemenation to Coders;
    {{{
-      Coders.addEncoder("3",// your encoder class);
-      Coders.addDecoder("3",// your decoder class);
+      Codecs.addEncoder(4,// your encoder class);
+      Codecs.addDecoder(4,// your decoder class);
    }}}
-  * When u call AbstractClient.invokeSync,u can set codectype to 3,then framework will use your encoder & decoder.
+  * When u call AbstractClient.invokeSync,u can set codectype to 4,then framework will use your encoder & decoder.
 
 = Custom Protocol =
 
