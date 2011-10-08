@@ -1,4 +1,4 @@
-#labels UserGuide,MinaRPC,NettyRPC
+#labels UserGuide,MinaRPC,NettyRPC,GrizzlyRPC
 The current version support two styles rpc.
   * RPC based on interface,when u use this style,u should implement an interface,then will call this implemention class directly.
   * RPC based on reflection,when u use this style,client use proxy to call server method,the framework will use reflection to call approviate instance and method.
@@ -22,7 +22,7 @@ Use this rpc framework,u can realize rpc very simply.
       public class MyMinaServer{
          public static void main(String[] args) throws Exception{
               Server server = new MinaServer();
-              server.registerProcessor(SimpleProcessorProtocol.TYPE,"myprocessor",new MyProcessor());
+              server.registerProcessor(SimpleProcessorProtocol.TYPE,String.class.getName(),new MyProcessor());
               ThreadFactory tf = new NamedThreadFactory("BUSINESSTHREADPOOL");
 	      ExecutorService threadPool = new ThreadPoolExecutor(20, 100,
 				300, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), tf);
@@ -102,3 +102,10 @@ Use this rpc framework,u can realize rpc very simply.
   * MinaServer to NettyServer;
   * MinaClientFactory to NettyClientFactory;
   * MinaClientInvocationHandler to NettyClientInvocationHandler;
+
+= Grizzly RPC =
+
+  It's very similiar to Mina RPC,u only need make below changes: 
+  * MinaServer to GrizzlyServer;
+  * MinaClientFactory to GrizzlyClientFactory;
+  * MinaClientInvocationHandler to GrizzlyClientInvocationHandler;
