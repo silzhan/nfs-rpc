@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>code.google.nfs.rpc</groupId>
     <artifactId>nfs-rpc-grizzly</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>nfs-rpc-grizzly</name>
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>code.google.nfs.rpc</groupId>
             <artifactId>nfs-rpc-common</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
