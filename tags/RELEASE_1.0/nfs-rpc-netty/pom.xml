@@ -1,0 +1,84 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>code.google.nfs.rpc</groupId>
+  <artifactId>nfs-rpc-netty</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>netty</name>
+  <url>http://bluedavy.com/projects/rpc-benchmark/netty</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-eclipse-plugin</artifactId>
+        <version>2.5.1</version>
+        <configuration>
+          <downloadSources>true</downloadSources>
+          <downloadJavadocs>false</downloadJavadocs>
+          <projectNameTemplate>${project.artifactId}-${project.version}</projectNameTemplate>
+        </configuration>
+      </plugin>
+      <plugin>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<configuration>
+				<source>1.6</source>
+				<target>1.6</target>
+				<encoding>GBK</encoding>
+			</configuration>
+		</plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+	  <groupId>com.caucho</groupId>
+	  <artifactId>hessian</artifactId>
+	  <version>4.0.7</version>
+	  <scope>runtime</scope>
+	</dependency>
+	<dependency>
+	  <groupId>com.google.protobuf</groupId>
+	  <artifactId>protobuf-java</artifactId>
+	  <version>2.4.1</version>
+	</dependency>
+	<dependency>
+	  <groupId>org.jboss.netty</groupId>
+	  <artifactId>netty</artifactId>
+	  <version>3.2.5.Final</version>
+	</dependency>
+	<dependency>
+      <groupId>code.google.nfs.rpc</groupId>
+      <artifactId>nfs-rpc-common</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>1.1</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+          </exclusion>
+          <exclusion>
+            <groupId>avalon-framework</groupId>
+            <artifactId>avalon-framework</artifactId>
+          </exclusion>
+        </exclusions>
+    </dependency>
+  </dependencies>
+</project>
