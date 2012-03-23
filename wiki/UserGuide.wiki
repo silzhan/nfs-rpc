@@ -45,7 +45,7 @@ Use this rpc framework,u can realize rpc very simply.
        // datatype mean serialize/deserialize
        //       current support Java or Hessian or Protobuf
        // if u use Protobuf,pls call PBDecoder.addMessage first.
-       String result=client.invokeSync("hello",rpcTimeout,Protocol.HESSIAN_DATA,SimpleProcessorProtocol.TYPE);
+       String result=client.invokeSync("hello",rpcTimeout,Codecs.HESSIAN_CODEC,SimpleProcessorProtocol.TYPE);
     }}}
 
 == Reflection RPC ==
@@ -88,7 +88,7 @@ Use this rpc framework,u can realize rpc very simply.
 	List<InetSocketAddress> servers = new ArrayList<InetSocketAddress>();
 	servers.add(new InetSocketAddress(serverIP, serverPort));
         // Protocol also support Protobuf & Java,if u use Protobuf,u need call PBDecoder.addMessage first.
-        int codectype = Protocol.HESSIAN_DATA;
+        int codectype = Codecs.HESSIAN_CODEC;
         HelloWorldService service = (HelloWorldService) Proxy.newProxyInstance(
 				this.getClass().getClassLoader(),
 				new Class<?>[] { HelloWorldService.class },
