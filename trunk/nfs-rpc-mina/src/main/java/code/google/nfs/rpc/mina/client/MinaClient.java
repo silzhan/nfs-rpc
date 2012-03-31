@@ -18,6 +18,7 @@ import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 import code.google.nfs.rpc.client.AbstractClient;
 import code.google.nfs.rpc.client.Client;
+import code.google.nfs.rpc.client.ClientFactory;
 /**
  * Mina Client
  * 
@@ -83,6 +84,10 @@ public class MinaClient extends AbstractClient {
 		});
 	}
 
+	public long getSendingBytesSize() {
+		return session.getScheduledWriteBytes();
+	}
+	
 	public String getServerIP() {
 		return ((InetSocketAddress) session.getRemoteAddress()).getAddress().getHostAddress();
 	}
@@ -93,6 +98,10 @@ public class MinaClient extends AbstractClient {
 
 	public int getConnectTimeout() {
 		return connectTimeout;
+	}
+	
+	public ClientFactory getClientFactory() {
+		return MinaClientFactory.getInstance();
 	}
 
 }
