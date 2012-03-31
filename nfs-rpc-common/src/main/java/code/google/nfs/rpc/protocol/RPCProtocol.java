@@ -149,14 +149,18 @@ public class RPCProtocol implements Protocol {
 		}
 		else{
 			ResponseWrapper wrapper = (ResponseWrapper) message;
-			byte[] body = null;
-			byte[] className = null;
-			if(wrapper.getResponse() == null){
-				wrapper.setResponse(true);
-			}
+			byte[] body = new byte[0];
+			byte[] className = new byte[0];
 			try{
-				className = wrapper.getResponse().getClass().getName().getBytes();
-				body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
+				// no return object
+				if(wrapper.getResponse() != null){
+					className = wrapper.getResponse().getClass().getName().getBytes();
+					body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getResponse());
+				}
+				if(wrapper.isError()){
+					className = wrapper.getException().getClass().getName().getBytes();
+					body = Codecs.getEncoder(wrapper.getCodecType()).encode(wrapper.getException());
+				}
 				id = wrapper.getRequestId();
 			}
 			catch(Exception e){

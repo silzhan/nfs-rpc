@@ -22,6 +22,8 @@ public abstract class AbstractClientFactory implements ClientFactory {
 	// Cache client
 	private static ConcurrentHashMap<String, FutureTask<List<Client>>> clients = 
 		new ConcurrentHashMap<String, FutureTask<List<Client>>>();
+	
+	private static boolean isSendLimitEnabled = false;
 
 	public Client get(final String targetIP, final int targetPort,
 			final int connectTimeout, String... customKey) throws Exception {
@@ -86,6 +88,43 @@ public abstract class AbstractClientFactory implements ClientFactory {
 		} catch (Exception e) {
 			// IGNORE
 		}
+	}
+	
+	public void enableSendLimit(){
+		isSendLimitEnabled = true;
+	}
+	
+	/**
+	 * check if sending bytes size exceed limit threshold
+	 */
+	public void checkSendLimit() throws Exception{
+		if(!isSendLimitEnabled)
+			return;
+		long threshold =  javaHeapSize * sendLimitPercent / 100;
+		long sendingBytesSize = getSendingBytesSize();
+		if(sendingBytesSize >= threshold){
+			if(sendLimitPolicy == SendLimitPolicy.REJECT){
+				throw new Exception("sending bytes size exceed threshold,size: "+sendingBytesSize+", threshold: "+threshold);
+			}
+			else{
+				Thread.sleep(1000);
+				sendingBytesSize = getSendingBytesSize();
+				if(sendingBytesSize >= threshold){
+					throw new Exception("sending bytes size exceed threshold,size: "+sendingBytesSize+", threshold: "+threshold);
+				}
+			}
+		}
+	}
+	
+	private long getSendingBytesSize() throws Exception{
+		long sendingBytesSize = 0;
+		for (FutureTask<List<Client>> clientListTask : clients.values()) {
+			List<Client> clientList = clientListTask.get();
+			for (Client client : clientList) {
+				sendingBytesSize += client.getSendingBytesSize();
+			}
+		}
+		return sendingBytesSize;
 	}
 
 	public static ClientFactory getInstance() {
