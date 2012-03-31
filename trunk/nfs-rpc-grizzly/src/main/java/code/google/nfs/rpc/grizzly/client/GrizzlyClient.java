@@ -11,6 +11,7 @@ import org.glassfish.grizzly.Connection;
 
 import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.client.AbstractClient;
+import code.google.nfs.rpc.client.ClientFactory;
 
 /**
  * Grizzly Client
@@ -36,7 +37,6 @@ public class GrizzlyClient extends AbstractClient {
     @SuppressWarnings({"unchecked", "rawtypes"})
 	public void sendRequest(RequestWrapper wrapper, int timeout)
 		throws Exception {
-//        System.out.println("sendRequest connection=" + connection + " tp=" + Thread.currentThread());
 		connection.write(wrapper, new CompletionHandler() {
 
 			public void cancelled() {
@@ -65,5 +65,13 @@ public class GrizzlyClient extends AbstractClient {
 
 	public int getConnectTimeout() {
 		return connectTimeout;
+	}
+
+	public long getSendingBytesSize() {
+		return connection.getWriteBufferSize();
+	}
+
+	public ClientFactory getClientFactory() {
+		return GrizzlyClientFactory.getInstance();
 	}
 }

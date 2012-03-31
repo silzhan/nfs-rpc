@@ -32,7 +32,7 @@ public class GrizzlyByteBufferWrapper implements ByteBufferWrapper {
 	}
 	
 	public ByteBufferWrapper get(int capacity) {
-                buffer = Buffers.wrap(ctx.getMemoryManager(), new byte[capacity]);
+		buffer = Buffers.wrap(ctx.getMemoryManager(), new byte[capacity]);
 		return this;
 	}
 	

@@ -22,8 +22,6 @@ import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 public class GrizzlySimpleBenchmarkClient extends AbstractSimpleProcessorBenchmarkClient {
 
     public static void main(String[] args) throws Exception {
-        String[] myArgs = new String[] {"localhost", "9090", "1", "500", "2", "100", "60"};
-//        new GrizzlySimpleBenchmarkClient().run(myArgs);
         new GrizzlySimpleBenchmarkClient().run(args);
     }
 
@@ -31,7 +29,6 @@ public class GrizzlySimpleBenchmarkClient extends AbstractSimpleProcessorBenchma
         return GrizzlyClientFactory.getInstance();
     }
 
-    @Override
     protected void startRunnables(List<ClientRunnable> runnables) {
         ThreadPoolConfig tpc = ThreadPoolConfig.defaultConfig()
                 .copy()
