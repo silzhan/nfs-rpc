@@ -36,7 +36,7 @@ public abstract class AbstractClient implements Client {
 
 	protected static ConcurrentHashMap<Integer, ArrayBlockingQueue<Object>> responses = 
 			new ConcurrentHashMap<Integer, ArrayBlockingQueue<Object>>();
-
+	
 	public Object invokeSync(Object message, int timeout, int codecType, int protocolType)
 			throws Exception {
 		RequestWrapper wrapper = new RequestWrapper(message, timeout, codecType, protocolType);
@@ -65,6 +65,7 @@ public abstract class AbstractClient implements Client {
 				// for performance trace
 				LOGGER.debug("client ready to send message,request id: "+wrapper.getId());
 			}
+			getClientFactory().checkSendLimit();
 			sendRequest(wrapper, wrapper.getTimeout());
 			if(isDebugEnabled){
 				// for performance trace
@@ -132,13 +133,19 @@ public abstract class AbstractClient implements Client {
 				if(responseWrapper.getResponseClassName() != null){
 					responseClassName = new String(responseWrapper.getResponseClassName());
 				}
-				Object responseObject = Codecs.getDecoder(responseWrapper.getCodecType()).decode(
-					responseClassName,(byte[]) responseWrapper.getResponse());
-				if (responseObject instanceof Throwable) {
-					responseWrapper.setException((Throwable) responseObject);
-				} 
-				else {
-					responseWrapper.setResponse(responseObject);
+				// avoid server no return object
+				if(((byte[])responseWrapper.getResponse()).length == 0){
+					responseWrapper.setResponse(null);
+				}
+				else{
+					Object responseObject = Codecs.getDecoder(responseWrapper.getCodecType()).decode(
+						responseClassName,(byte[]) responseWrapper.getResponse());
+					if (responseObject instanceof Throwable) {
+						responseWrapper.setException((Throwable) responseObject);
+					} 
+					else {
+						responseWrapper.setResponse(responseObject);
+					}
 				}
 			}
 		}
@@ -210,6 +217,6 @@ public abstract class AbstractClient implements Client {
 	/**
 	 * send request to os sendbuffer,must ensure write result
 	 */
-	public abstract void sendRequest(RequestWrapper wrapper, int timeout) throws Exception;
+	public abstract void sendRequest(RequestWrapper wrapper, int timeout) throws Exception; 
 
 }

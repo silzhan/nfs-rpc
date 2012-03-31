@@ -84,5 +84,17 @@ public interface Client {
 	 * @return
 	 */
 	public int getConnectTimeout();
+	
+	/**
+	 * get sending bytes size
+	 * 
+	 * @return long
+	 */
+	public long getSendingBytesSize();
+	
+	/**
+	 * Get factory
+	 */
+	public ClientFactory getClientFactory();
 
 }
