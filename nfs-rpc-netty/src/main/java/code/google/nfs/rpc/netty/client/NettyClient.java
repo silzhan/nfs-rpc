@@ -17,6 +17,7 @@ import code.google.nfs.rpc.RequestWrapper;
 import code.google.nfs.rpc.ResponseWrapper;
 import code.google.nfs.rpc.client.AbstractClient;
 import code.google.nfs.rpc.client.Client;
+import code.google.nfs.rpc.client.ClientFactory;
 
 /**
  * Netty Client
@@ -93,6 +94,15 @@ public class NettyClient extends AbstractClient {
 
 	public int getConnectTimeout() {
 		return connectTimeout;
+	}
+
+	public long getSendingBytesSize() {
+		// TODO: implement it
+		return 0;
+	}
+
+	public ClientFactory getClientFactory() {
+		return NettyClientFactory.getInstance();
 	}
 
 }
