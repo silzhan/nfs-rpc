@@ -62,7 +62,8 @@ public class GrizzlyServerHandler extends BaseFilter {
         return ctx.getStopAction();
     }
     
-    private void sendErrorResponse(final Connection connection, final RequestWrapper request) throws IOException {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	private void sendErrorResponse(final Connection connection, final RequestWrapper request) throws IOException {
         ResponseWrapper responseWrapper = new ResponseWrapper(request.getId(), request.getCodecType(), request.getProtocolType());
         responseWrapper.setException(new Exception("server threadpool full,maybe because server is slow or too many requests"));
 
@@ -73,7 +74,7 @@ public class GrizzlyServerHandler extends BaseFilter {
                   LOGGER.error("server write response error,request id is: " + request.getId());
             }
             
-        }).markForRecycle(true);
+        });
     }
 
     class HandlerRunnable implements Runnable {
@@ -90,7 +91,7 @@ public class GrizzlyServerHandler extends BaseFilter {
             this.threadPool = threadPool;
         }
 
-        @SuppressWarnings("rawtypes")
+        @SuppressWarnings({ "rawtypes", "unchecked" })
         public void run() {
             // pipeline
             if (message instanceof List) {
@@ -112,15 +113,12 @@ public class GrizzlyServerHandler extends BaseFilter {
                     return;
                 }
 
-                try {
-                    connection.write(responseWrapper, new EmptyCompletionHandler<WriteResult>() {
-                        @Override
-                        public void failed(Throwable throwable) {
-                            LOGGER.error("server write response error,request id is: " + id);
-                        }
-                    }).markForRecycle(true);
-                } catch (IOException ignored) {
-                }
+                connection.write(responseWrapper, new EmptyCompletionHandler<WriteResult>() {
+                    @Override
+                    public void failed(Throwable throwable) {
+                        LOGGER.error("server write response error,request id is: " + id);
+                    }
+                });
             }
         }
     }
