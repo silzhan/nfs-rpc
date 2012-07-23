@@ -101,10 +101,12 @@ public class RPCProtocol implements Protocol {
 					requestArgTypesLen += requestArgType.length;
 				}
 				Object[] requestObjects = wrapper.getRequestObjects();
-				for (Object requestArg : requestObjects) {
-					byte[] requestArgByte = Codecs.getEncoder(wrapper.getCodecType()).encode(requestArg);
-					requestArgs.add(requestArgByte);
-					requestArgsLen += requestArgByte.length;
+				if(requestObjects!=null){
+					for (Object requestArg : requestObjects) {
+						byte[] requestArgByte = Codecs.getEncoder(wrapper.getCodecType()).encode(requestArg);
+						requestArgs.add(requestArgByte);
+						requestArgsLen += requestArgByte.length;
+					}
 				}
 				byte[] targetInstanceNameByte = wrapper.getTargetInstanceName();
 				byte[] methodNameByte = wrapper.getMethodName();
