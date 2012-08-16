@@ -31,4 +31,9 @@ public class RequestObjectSerializer extends Serializer<RequestObject> {
 	public RequestObject create(Kryo kryo, Input input, Class<RequestObject> type) {
 		return new RequestObject(input.getBuffer().length - 1);
 	}
+
+  @Override
+  public RequestObject read(Kryo kryo, Input input, Class<RequestObject> type) {
+    return kryo.readObjectOrNull(input, type);
+  }
 }
