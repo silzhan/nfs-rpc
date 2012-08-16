@@ -31,4 +31,10 @@ public class ResponseObjectSerializer extends Serializer<ResponseObject> {
 	public ResponseObject create(Kryo kryo, Input input, Class<ResponseObject> type) {
 		return new ResponseObject(input.getBuffer().length - 1);
 	}
+
+  @Override
+  public ResponseObject read(Kryo kryo, Input input,
+      Class<ResponseObject> type) {
+    return kryo.readObjectOrNull(input, type);
+  }
 }
