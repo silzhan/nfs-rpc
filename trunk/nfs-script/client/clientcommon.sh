@@ -1,1 +1,1 @@
-java -Xms4g -Xmx4g -Xmn1g -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -Dwrite.statistics=true -Djava.ext.dirs=$1 $2 [serverip] [serverport] [concurrents] [timeout] [datatype] [requestsize] [runtime] [clientnums] > $3 2>&1 &
+java -Xms4g -Xmx4g -Xmn1g -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:gc.log -Dwrite.statistics=true -Djava.ext.dirs="../../lib" $1 [serverip] [serverport] [concurrents] [timeout] [datatype] [requestsize] [runtime] [clientnums] > $2 2>&1 &

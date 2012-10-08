@@ -1,1 +1,2 @@
-sh clientcommon.sh "nettylib" "code.google.nfs.rpc.netty.benchmark.NettyRPCBenchmarkClient" "benchmark.log.netty.rpc"
+cd `dirname $0`
+sh clientcommon.sh "code.google.nfs.rpc.netty.benchmark.NettyRPCBenchmarkClient" "benchmark.log.netty.rpc"
