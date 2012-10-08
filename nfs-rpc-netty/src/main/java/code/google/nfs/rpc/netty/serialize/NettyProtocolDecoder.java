@@ -85,10 +85,10 @@ public class NettyProtocolDecoder extends FrameDecoder {
             results.add(frame);
         }
         if(results.size() > 0)
-        	unfoldAndFireMessageReceived(context, remoteAddress, results);
+        	fireMessageReceived(context, remoteAddress, results);
     }
-
-    private void unfoldAndFireMessageReceived(ChannelHandlerContext context, SocketAddress remoteAddress, Object result) {
+	
+	private void fireMessageReceived(ChannelHandlerContext context, SocketAddress remoteAddress, Object result) {
         Channels.fireMessageReceived(context, result, remoteAddress);
     }
 	

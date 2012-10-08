@@ -1,1 +1,2 @@
-sh servercommon.sh "nettylib" "code.google.nfs.rpc.netty.benchmark.NettyBenchmarkServer" "server.log.netty"
+cd `dirname $0`
+sh servercommon.sh "code.google.nfs.rpc.netty.benchmark.NettyBenchmarkServer" "server.log.netty"
