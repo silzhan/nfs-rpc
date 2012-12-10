@@ -27,18 +27,10 @@ public class NettyClientFactory extends AbstractClientFactory {
 
 	private static final Log LOGGER = LogFactory.getLog(NettyClientFactory.class);
 	
-	private ClientBootstrap bootstrap = null;
-	
 	private static AbstractClientFactory _self = new NettyClientFactory();
 	
 	private NettyClientFactory(){
-		ThreadFactory bossThreadFactory = new NamedThreadFactory("NETTYCLIENT-BOSS-");
-		ThreadFactory workerThreadFactory = new NamedThreadFactory("NETTYCLIENT-WORKER-");
-		bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
-										Executors.newCachedThreadPool(bossThreadFactory),
-										Executors.newCachedThreadPool(workerThreadFactory)));
-		bootstrap.setOption("tcpNoDelay", Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
-		bootstrap.setOption("reuseAddress", Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.reuseaddress", "true")));
+		;
 	}
 	
 	public static AbstractClientFactory getInstance() {
@@ -47,6 +39,13 @@ public class NettyClientFactory extends AbstractClientFactory {
 	
 	protected Client createClient(String targetIP, int targetPort,
 			int connectTimeout, String key) throws Exception {
+		ThreadFactory bossThreadFactory = new NamedThreadFactory("NETTYCLIENT-BOSS-");
+		ThreadFactory workerThreadFactory = new NamedThreadFactory("NETTYCLIENT-WORKER-");
+		ClientBootstrap bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
+				Executors.newCachedThreadPool(bossThreadFactory),
+				Executors.newCachedThreadPool(workerThreadFactory)));
+		bootstrap.setOption("tcpNoDelay", Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.nodelay", "true")));
+		bootstrap.setOption("reuseAddress", Boolean.parseBoolean(System.getProperty("nfs.rpc.tcp.reuseaddress", "true")));
 		if(connectTimeout<1000){
 			bootstrap.setOption("connectTimeoutMillis", 1000);
 		}
