@@ -66,7 +66,7 @@
 	  <version>4.0.7</version>
 	</dependency>
 	<dependency>
-		<groupId>com.esotericsoftware</groupId>
+		<groupId>com.esotericsoftware.kryo</groupId>
 		<artifactId>kryo</artifactId>
 		<version>2.19</version>
 	</dependency>
