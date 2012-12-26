@@ -32,7 +32,7 @@
 	  <artifactId>hessian</artifactId>
 	</dependency>
 	<dependency>
-		<groupId>com.esotericsoftware</groupId>
+		<groupId>com.esotericsoftware.kryo</groupId>
 		<artifactId>kryo</artifactId>
 	</dependency>
     <dependency>
