@@ -13,6 +13,7 @@
 	<module>nfs-rpc-mina</module>
 	<module>nfs-rpc-mina2</module>
 	<module>nfs-rpc-netty</module>
+        <module>nfs-rpc-netty4</module>
   </modules>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
